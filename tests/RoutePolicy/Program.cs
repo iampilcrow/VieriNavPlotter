@@ -53,7 +53,9 @@ Check(BuiltInRouteCatalog.All.Where(route => !route.IsCompletePath).All(route =>
     "Destination-only templates must not silently become enabled route overrides.");
 BuiltInRouteTemplate domitien = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1000215);
 Check(domitien.Points.Count == 2, "Domitien must use the clear center-aisle and safe interaction points only.");
-Check(Vector3.Distance(domitien.Points[^1].Position, new Vector3(152.8512f, 15.5f, -71.9293f)) is > 1.5f and < 2.9f,
+Check(domitien.Points[^1].Position == new Vector3(157.5930f, 15.7000f, -69.3316f),
+    "Domitien's final movement point must retain the measured in-game standing coordinate.");
+Check(Vector3.Distance(domitien.Points[^1].Position, new Vector3(152.8512f, 15.5f, -71.9293f)) is > 5f and < 6f,
     "Domitien's final movement point must stand in front of the NPC instead of using his wall-side object coordinate.");
 
 Console.WriteLine($"VieriNavPlotter RoutePolicy: {checks} checks passed.");

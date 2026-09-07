@@ -43,7 +43,7 @@ internal static class BuiltInRouteCatalog
         new("arr-domitien", "Domitien — Ebony Stalls hall", "ARR cities", 133, 1000215, "Domitien", "1–49",
         [
             Point(160.35f, 15.5f, -62f),
-            Point(154.2050f, 15.5f, -70.1330f),
+            Point(157.5930f, 15.7000f, -69.3316f),
         ], true, false, "The generated navmesh approach enters the hall at its clear center aisle, then stops in front of Domitien. The NPC's wall-side object coordinate is intentionally not a movement point."),
         Destination("arr-geraint", "Geraint — weapons", "ARR cities", 133, 1000217, "Geraint", "1–49", 167.8366f, 15.5f, -76.9244f),
 
