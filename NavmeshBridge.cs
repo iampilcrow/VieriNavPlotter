@@ -7,6 +7,8 @@ namespace VieriNavPlotter;
 internal sealed class NavmeshBridge
 {
     private readonly ICallGateSubscriber<bool> isReady;
+    private readonly ICallGateSubscriber<bool> isRunning;
+    private readonly ICallGateSubscriber<List<Vector3>> listWaypoints;
     private readonly ICallGateSubscriber<List<Vector3>, bool, object> moveTo;
     private readonly ICallGateSubscriber<float, object> setTolerance;
     private readonly ICallGateSubscriber<object> stop;
@@ -16,9 +18,30 @@ internal sealed class NavmeshBridge
     {
         this.log = log;
         isReady = pi.GetIpcSubscriber<bool>("vnavmesh.Nav.IsReady");
+        isRunning = pi.GetIpcSubscriber<bool>("vnavmesh.Path.IsRunning");
+        listWaypoints = pi.GetIpcSubscriber<List<Vector3>>("vnavmesh.Path.ListWaypoints");
         moveTo = pi.GetIpcSubscriber<List<Vector3>, bool, object>("vnavmesh.Path.MoveTo");
         setTolerance = pi.GetIpcSubscriber<float, object>("vnavmesh.Path.SetTolerance");
         stop = pi.GetIpcSubscriber<object>("vnavmesh.Path.Stop");
+    }
+
+    internal IReadOnlyList<Vector3> GetActiveWaypoints()
+    {
+        try
+        {
+            if (!isRunning.InvokeFunc())
+                return [];
+
+            return listWaypoints.InvokeFunc()
+                .Where(point => float.IsFinite(point.X) && float.IsFinite(point.Y) && float.IsFinite(point.Z))
+                .ToArray();
+        }
+        catch
+        {
+            // vnavmesh is optional and can reload independently. A missing frame should simply
+            // hide the live overlay rather than logging an exception every render tick.
+            return [];
+        }
     }
 
     internal bool TryPlay(PlottedRoute route, Vector3 playerPosition, out string message)

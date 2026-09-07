@@ -11,6 +11,8 @@ public sealed class Configuration : IPluginConfiguration
     public float MinimumPointDistance { get; set; } = 0.75f;
     public bool ShowWorldPreview { get; set; } = true;
     public bool ShowPointNumbers { get; set; } = true;
+    public bool ShowLiveNavigationPath { get; set; } = true;
+    public float LibraryPaneWidth { get; set; } = 355f;
     public List<PlottedRoute> Routes { get; set; } = [];
     public Guid? SelectedRouteId { get; set; }
 

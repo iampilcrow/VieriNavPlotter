@@ -5,6 +5,8 @@ VieriNavPlotter records and edits precise in-world routes for the Vieri plugin s
 - Timed capture follows your movement at a configurable interval and distance.
 - Manual capture adds the current position one point at a time.
 - **Show Route** keeps the selected route's world-space line and numbered points visible for review; destination-only catalog entries show an honest generated-approach guide instead of pretending they contain authored segments.
+- Live vnavmesh waypoints are drawn from the character through the complete calculated route and update as navigation consumes or recalculates them.
+- The route-library pane is wider by default and has a draggable divider. **See My Current Point** displays and copies exact territory/X/Y/Z coordinates for route corrections.
 - **Travel to Start** uses VieriAutoDuty's normal teleport, Aethernet, flight, navmesh, and stall-recovery flow to take you to the route.
 - **Play Route** follows every saved point in order through that same travel flow, including cross-zone starts; **Stop Playback** stops both AutoDuty travel and local vnavmesh playback.
 - Routes can be reversed, duplicated, played, and bound as opt-in automation overrides.

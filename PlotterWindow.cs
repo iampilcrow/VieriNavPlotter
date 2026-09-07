@@ -20,6 +20,9 @@ internal sealed class PlotterWindow : Window
     private string selectedTemplateId = "arr-domitien";
     private string? previewTemplateId;
     private Guid? previewRouteId;
+    private bool resizingLibrary;
+    private Vector3? currentPointSnapshot;
+    private uint currentPointTerritory;
 
     internal PlotterWindow(Configuration config, NavmeshBridge navmesh, SuiteTravelBridge suiteTravel)
         : base("VieriNavPlotter###VieriNavPlotter", ImGuiWindowFlags.NoScrollbar)
@@ -37,12 +40,30 @@ internal sealed class PlotterWindow : Window
     public override void Draw()
     {
         DrawHeader();
-        if (ImGui.BeginChild("RouteLibrary", new Vector2(245, 0), true)) DrawLibrary();
+        float availableWidth = ImGui.GetContentRegionAvail().X;
+        float maximumLibraryWidth = Math.Max(280f, availableWidth - 330f);
+        config.LibraryPaneWidth = Math.Clamp(config.LibraryPaneWidth, 280f, maximumLibraryWidth);
+        if (ImGui.BeginChild("RouteLibrary", new Vector2(config.LibraryPaneWidth, 0), true)) DrawLibrary();
         ImGui.EndChild();
+        ImGui.SameLine();
+        ImGui.InvisibleButton("##RouteLibrarySplitter", new Vector2(7f, -1f));
+        if (ImGui.IsItemHovered()) ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEw);
+        if (ImGui.IsItemActive())
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEw);
+            resizingLibrary = true;
+            config.LibraryPaneWidth = Math.Clamp(config.LibraryPaneWidth + ImGui.GetIO().MouseDelta.X, 280f, maximumLibraryWidth);
+        }
+        else if (resizingLibrary && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+        {
+            resizingLibrary = false;
+            config.Save();
+        }
         ImGui.SameLine();
         if (ImGui.BeginChild("RouteEditor", Vector2.Zero, true)) DrawEditor();
         ImGui.EndChild();
         DrawDeleteConfirmation();
+        DrawCurrentPointPopup();
     }
 
     private void DrawHeader()
@@ -50,7 +71,9 @@ internal sealed class PlotterWindow : Window
         ImGui.TextColored(new Vector4(0.95f, 0.25f, 0.25f, 1), "VIERI NAV PLOTTER");
         ImGui.SameLine();
         ImGui.TextDisabled("Record • refine • preview • override");
-        ImGui.SameLine(ImGui.GetWindowWidth() - 290);
+        ImGui.SameLine();
+        if (ImGui.Button("See My Current Point")) CaptureCurrentPoint();
+        ImGui.SameLine(ImGui.GetWindowWidth() - 160);
         ImGui.TextColored(recording ? ImGuiColors.HealerGreen : ImGuiColors.DalamudGrey, recording ? "● RECORDING" : "● IDLE");
         ImGui.Separator();
     }
@@ -58,7 +81,8 @@ internal sealed class PlotterWindow : Window
     private void DrawLibrary()
     {
         if (ImGui.Button("+ New route", new Vector2(-1, 0))) CreateRoute();
-        if (ImGui.Button("Built-in vendor paths", new Vector2(118, 0))) showBuiltIns = true;
+        float libraryButtonWidth = Math.Max(165f, (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X) * 0.62f);
+        if (ImGui.Button("Built-in vendor paths", new Vector2(libraryButtonWidth, 0))) showBuiltIns = true;
         ImGui.SameLine();
         if (ImGui.Button("My routes", new Vector2(-1, 0))) showBuiltIns = false;
         ImGui.SetNextItemWidth(-1);
@@ -127,6 +151,9 @@ internal sealed class PlotterWindow : Window
         ImGui.SameLine();
         bool numbers = config.ShowPointNumbers;
         if (ImGui.Checkbox("Point numbers", ref numbers)) { config.ShowPointNumbers = numbers; config.Save(); }
+        ImGui.SameLine();
+        bool liveNavigation = config.ShowLiveNavigationPath;
+        if (ImGui.Checkbox("Live navigation waypoints", ref liveNavigation)) { config.ShowLiveNavigationPath = liveNavigation; config.Save(); }
 
         Section("Playback");
         bool mesh = route.UseMesh;
@@ -216,6 +243,9 @@ internal sealed class PlotterWindow : Window
 
     internal void DrawWorldPreview()
     {
+        var draw = ImGui.GetForegroundDrawList();
+        if (config.ShowLiveNavigationPath)
+            DrawLiveNavigationPath(draw);
         if (!config.ShowWorldPreview) return;
         IReadOnlyList<RoutePoint> points;
         uint territoryId;
@@ -241,7 +271,6 @@ internal sealed class PlotterWindow : Window
         }
         else return;
         if (territoryId != Plugin.ClientState.TerritoryType) return;
-        var draw = ImGui.GetForegroundDrawList();
         uint lineColor = ImGui.GetColorU32(new Vector4(0.95f, 0.18f, 0.18f, 0.9f));
         uint guideColor = ImGui.GetColorU32(new Vector4(1f, 0.62f, 0.12f, 0.85f));
         uint pointColor = ImGui.GetColorU32(new Vector4(1f, 0.75f, 0.15f, 1f));
@@ -259,6 +288,37 @@ internal sealed class PlotterWindow : Window
             if (i == 0) draw.AddText(screen + new Vector2(10, 8), pointColor,
                 completePath ? routeName : $"{routeName} (generated approach)");
             previous = screen;
+        }
+    }
+
+    private void DrawLiveNavigationPath(ImDrawListPtr draw)
+    {
+        if (Plugin.Objects.LocalPlayer is not { } player)
+            return;
+
+        IReadOnlyList<Vector3> waypoints = navmesh.GetActiveWaypoints();
+        if (waypoints.Count == 0)
+            return;
+
+        uint firstLineColor = ImGui.GetColorU32(new Vector4(0.2f, 1f, 0.45f, 0.95f));
+        uint lineColor = ImGui.GetColorU32(new Vector4(0.15f, 0.82f, 1f, 0.92f));
+        uint pointColor = ImGui.GetColorU32(new Vector4(0.2f, 1f, 0.85f, 1f));
+        Vector3 previousWorld = player.Position;
+
+        for (int i = 0; i < waypoints.Count; i++)
+        {
+            Vector3 waypoint = waypoints[i];
+            bool previousVisible = Plugin.GameGui.WorldToScreen(previousWorld, out Vector2 previousScreen);
+            bool waypointVisible = Plugin.GameGui.WorldToScreen(waypoint, out Vector2 waypointScreen);
+            if (previousVisible && waypointVisible)
+                draw.AddLine(previousScreen, waypointScreen, i == 0 ? firstLineColor : lineColor, 3f);
+            if (waypointVisible)
+            {
+                draw.AddCircleFilled(waypointScreen, i == waypoints.Count - 1 ? 7f : 5f, pointColor);
+                if (config.ShowPointNumbers)
+                    draw.AddText(waypointScreen + new Vector2(7, -8), pointColor, $"N{i + 1}");
+            }
+            previousWorld = waypoint;
         }
     }
 
@@ -381,12 +441,68 @@ internal sealed class PlotterWindow : Window
             : "This entry stores one destination; Play uses AutoDuty to generate the safe approach.");
         ImGui.TextWrapped(status);
 
+        bool liveNavigation = config.ShowLiveNavigationPath;
+        if (ImGui.Checkbox("Show live generated navigation waypoints", ref liveNavigation))
+        {
+            config.ShowLiveNavigationPath = liveNavigation;
+            config.Save();
+        }
+
         Section("Stored points");
         for (int i = 0; i < template.Points.Count; i++)
         {
             RoutePoint point = template.Points[i];
             ImGui.TextUnformatted($"{i + 1,3}.  X {point.X,8:F2}   Y {point.Y,8:F2}   Z {point.Z,8:F2}");
         }
+    }
+
+    private void CaptureCurrentPoint()
+    {
+        if (Plugin.Objects.LocalPlayer is not { } player)
+        {
+            status = "Your character position is not available yet.";
+            return;
+        }
+
+        currentPointSnapshot = player.Position;
+        currentPointTerritory = Plugin.ClientState.TerritoryType;
+        ImGui.OpenPopup("Current Point###VieriNavPlotterCurrentPoint");
+    }
+
+    private void DrawCurrentPointPopup()
+    {
+        if (!ImGui.BeginPopupModal("Current Point###VieriNavPlotterCurrentPoint", ImGuiWindowFlags.AlwaysAutoResize))
+            return;
+
+        if (currentPointSnapshot is not { } point)
+        {
+            ImGui.TextDisabled("No character position is available.");
+        }
+        else
+        {
+            string plain = $"Territory {currentPointTerritory} | X {point.X:F4} | Y {point.Y:F4} | Z {point.Z:F4}";
+            string routePoint = $"Point({point.X:F4}f, {point.Y:F4}f, {point.Z:F4}f)";
+            ImGui.TextUnformatted($"Territory: {currentPointTerritory}");
+            ImGui.TextUnformatted($"X: {point.X:F4}");
+            ImGui.TextUnformatted($"Y: {point.Y:F4}");
+            ImGui.TextUnformatted($"Z: {point.Z:F4}");
+            ImGui.Spacing();
+            if (ImGui.Button("Copy Coordinates"))
+            {
+                ImGui.SetClipboardText(plain);
+                status = $"Copied {plain}.";
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Copy Route Point"))
+            {
+                ImGui.SetClipboardText(routePoint);
+                status = $"Copied {routePoint}.";
+            }
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Close")) ImGui.CloseCurrentPopup();
+        ImGui.EndPopup();
     }
 
     private void ImportClipboard()

@@ -51,5 +51,9 @@ Check(BuiltInRouteCatalog.All.Where(route => route.IsCompletePath).All(route => 
     "Every complete built-in template must produce a valid editable route.");
 Check(BuiltInRouteCatalog.All.Where(route => !route.IsCompletePath).All(route => !RoutePolicy.IsValid(route.CreateEditableCopy())),
     "Destination-only templates must not silently become enabled route overrides.");
+BuiltInRouteTemplate domitien = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1000215);
+Check(domitien.Points.Count == 2, "Domitien must use the clear center-aisle and safe interaction points only.");
+Check(Vector3.Distance(domitien.Points[^1].Position, new Vector3(152.8512f, 15.5f, -71.9293f)) is > 1.5f and < 2.9f,
+    "Domitien's final movement point must stand in front of the NPC instead of using his wall-side object coordinate.");
 
 Console.WriteLine($"VieriNavPlotter RoutePolicy: {checks} checks passed.");
