@@ -53,12 +53,14 @@ Check(BuiltInRouteCatalog.All.Where(route => !route.IsCompletePath).All(route =>
     "Destination-only templates must not silently become enabled route overrides.");
 BuiltInRouteTemplate domitien = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1000215);
 Check(domitien.Points.Count == 2, "Domitien must use the clear center-aisle and safe interaction points only.");
+Check(domitien.Points[0].Position == new Vector3(164.4264f, 15.5000f, -75.7035f),
+    "Domitien point 1 must retain the measured direct approach coordinate without an aisle overshoot.");
 Check(domitien.Points[^1].Position == new Vector3(157.5930f, 15.7000f, -69.3316f),
     "Domitien's final movement point must retain the measured in-game standing coordinate.");
 Check(Vector3.Distance(domitien.Points[^1].Position, new Vector3(152.8512f, 15.5f, -71.9293f)) is > 5f and < 6f,
     "Domitien's final movement point must stand in front of the NPC instead of using his wall-side object coordinate.");
-Check(domitien.LastPointTolerance is >= 0.1f and <= 0.5f,
-    "Domitien playback must reach the measured standing point instead of completing several yalms early.");
+Check(domitien.LastPointTolerance == 0.75f,
+    "Domitien playback must use a stable sub-yalm arrival radius instead of fighting navmesh over its final fraction of a yalm.");
 Check(domitien.CreateEditableCopy().LastPointTolerance == domitien.LastPointTolerance,
     "Copying Domitien to My Routes must preserve its precise final-point tolerance.");
 

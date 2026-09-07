@@ -46,9 +46,9 @@ internal static class BuiltInRouteCatalog
         Destination("arr-sorcha", "Sorcha — accessories", "ARR cities", 129, 1001202, "Sorcha", "1–49", -136.1650f, 18.1734f, 12.2894f),
         new("arr-domitien", "Domitien — Ebony Stalls hall", "ARR cities", 133, 1000215, "Domitien", "1–49",
         [
-            Point(160.35f, 15.5f, -62f),
+            Point(164.4264f, 15.5000f, -75.7035f),
             Point(157.5930f, 15.7000f, -69.3316f),
-        ], true, false, "The generated navmesh approach enters the hall at its clear center aisle, then stops precisely in front of Domitien. The NPC's wall-side object coordinate is intentionally not a movement point.", LastPointTolerance: 0.35f),
+        ], true, false, "The route approaches Domitien directly, then settles at the measured standing point in front of him. The NPC's wall-side object coordinate is intentionally not a movement point.", LastPointTolerance: 0.75f),
         Destination("arr-geraint", "Geraint — weapons", "ARR cities", 133, 1000217, "Geraint", "1–49", 167.8366f, 15.5f, -76.9244f),
 
         Destination("hw-seghuie", "Seghuie — accessories", "Heavensward", 419, 1011200, "Seghuie", "50–60", -188.3116f, -12.5349f, -42.71f),
