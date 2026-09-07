@@ -9,5 +9,6 @@
     <Compile Include="..\..\RouteModels.cs" Link="RouteModels.cs" />
     <Compile Include="..\..\BuiltInRouteCatalog.cs" Link="BuiltInRouteCatalog.cs" />
     <Compile Include="..\..\NavigationVisualizationPolicy.cs" Link="NavigationVisualizationPolicy.cs" />
+    <Compile Include="..\..\SuiteTravelRequestContract.cs" Link="SuiteTravelRequestContract.cs" />
   </ItemGroup>
 </Project>

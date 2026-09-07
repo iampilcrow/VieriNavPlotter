@@ -1,7 +1,7 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
-using System.Text.Json;
+using System.Numerics;
 
 namespace VieriNavPlotter;
 
@@ -23,22 +23,14 @@ internal sealed class SuiteTravelBridge
     }
 
     internal RouteDispatchResult Dispatch(uint territoryId, IReadOnlyList<RoutePoint> points, bool useFlight,
-        bool useMesh, float tolerance, float lastPointTolerance, bool travelOnly)
+        bool useMesh, float tolerance, float lastPointTolerance, bool travelOnly,
+        uint vendorTargetDataId = 0, Vector3? vendorPosition = null)
     {
         if (territoryId == 0 || points.Count == 0)
             return new RouteDispatchResult(true, false, "This route has no usable destination.");
 
-        IReadOnlyList<RoutePoint> requestedPoints = travelOnly ? [points[0]] : points;
-        string request = JsonSerializer.Serialize(new
-        {
-            TerritoryId = territoryId,
-            Points = requestedPoints,
-            UseFlight = useFlight,
-            UseMesh = useMesh,
-            Tolerance = tolerance,
-            LastPointTolerance = lastPointTolerance,
-            Mode = travelOnly ? "travel" : "play",
-        });
+        string request = SuiteTravelRequestContract.Create(territoryId, points, useFlight, useMesh,
+            tolerance, lastPointTolerance, travelOnly, vendorTargetDataId, vendorPosition);
 
         try
         {

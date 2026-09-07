@@ -167,10 +167,12 @@ internal sealed class PlotterWindow : Window
         if (ImGui.Button(showingRoute ? "Hide Route" : "Show Route")) TogglePreview(route);
         ImGui.SameLine();
         if (ImGui.Button("Travel to Start")) DispatchRoute(route.Name, route.TerritoryId, route.Points,
-                route.UseFlight, route.UseMesh, route.Tolerance, route.LastPointTolerance, travelOnly: true);
+                route.UseFlight, route.UseMesh, route.Tolerance, route.LastPointTolerance, travelOnly: true,
+                VendorTargetDataId(route), VendorPosition(route));
         ImGui.SameLine();
         if (ImGui.Button("Play Route")) DispatchRoute(route.Name, route.TerritoryId, route.Points,
-                route.UseFlight, route.UseMesh, route.Tolerance, route.LastPointTolerance, travelOnly: false);
+                route.UseFlight, route.UseMesh, route.Tolerance, route.LastPointTolerance, travelOnly: false,
+                VendorTargetDataId(route), VendorPosition(route));
         ImGui.SameLine();
         if (ImGui.Button("Stop Playback")) StopPlayback();
 
@@ -340,7 +342,8 @@ internal sealed class PlotterWindow : Window
         config.SelectedRouteId = route.Id;
         showBuiltIns = false;
         DispatchRoute(route.Name, route.TerritoryId, route.Points, route.UseFlight, route.UseMesh,
-            route.Tolerance, route.LastPointTolerance, travelOnly: false);
+            route.Tolerance, route.LastPointTolerance, travelOnly: false,
+            VendorTargetDataId(route), VendorPosition(route));
     }
 
     private void CreateRoute()
@@ -432,11 +435,13 @@ internal sealed class PlotterWindow : Window
         ImGui.SameLine();
         if (ImGui.Button(template.IsCompletePath ? "Travel to Start" : "Travel to Destination"))
             DispatchRoute(template.Name, template.TerritoryId, template.Points, template.UseFlight,
-                template.UseMesh, template.Tolerance, template.LastPointTolerance, travelOnly: true);
+                template.UseMesh, template.Tolerance, template.LastPointTolerance, travelOnly: true,
+                template.TargetDataId, template.ResolvedVendorPosition);
         ImGui.SameLine();
         if (ImGui.Button("Play Route"))
             DispatchRoute(template.Name, template.TerritoryId, template.Points, template.UseFlight,
-                template.UseMesh, template.Tolerance, template.LastPointTolerance, travelOnly: false);
+                template.UseMesh, template.Tolerance, template.LastPointTolerance, travelOnly: false,
+                template.TargetDataId, template.ResolvedVendorPosition);
         ImGui.SameLine();
         if (ImGui.Button("Stop Playback")) StopPlayback();
         ImGui.TextDisabled(template.IsCompletePath
@@ -569,7 +574,8 @@ internal sealed class PlotterWindow : Window
     }
 
     private void DispatchRoute(string name, uint territoryId, IReadOnlyList<RoutePoint> points, bool useFlight,
-        bool useMesh, float tolerance, float lastPointTolerance, bool travelOnly)
+        bool useMesh, float tolerance, float lastPointTolerance, bool travelOnly,
+        uint vendorTargetDataId = 0, Vector3? vendorPosition = null)
     {
         if (points.Count == 0)
         {
@@ -579,7 +585,7 @@ internal sealed class PlotterWindow : Window
         }
 
         RouteDispatchResult dispatch = suiteTravel.Dispatch(territoryId, points, useFlight, useMesh,
-            tolerance, lastPointTolerance, travelOnly);
+            tolerance, lastPointTolerance, travelOnly, vendorTargetDataId, vendorPosition);
         if (dispatch.Handled)
         {
             status = dispatch.Message;
@@ -599,6 +605,12 @@ internal sealed class PlotterWindow : Window
     }
 
     private static float RouteLength(PlottedRoute route) => route.Points.Zip(route.Points.Skip(1), (a, b) => Vector3.Distance(a.Position, b.Position)).Sum();
+    private static uint VendorTargetDataId(PlottedRoute route) =>
+        route.BindingKind == RouteBindingKind.GearVendor ? route.TargetDataId : 0;
+    private static Vector3? VendorPosition(PlottedRoute route) =>
+        route.BindingKind == RouteBindingKind.GearVendor
+            ? BuiltInRouteCatalog.FindVendorPosition(route.TerritoryId, route.TargetDataId)
+            : null;
     private bool MatchesSearch(PlottedRoute route) => string.IsNullOrWhiteSpace(search) ||
         route.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || route.Tags.Contains(search, StringComparison.OrdinalIgnoreCase) ||
         route.Notes.Contains(search, StringComparison.OrdinalIgnoreCase);

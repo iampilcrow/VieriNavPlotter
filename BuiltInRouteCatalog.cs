@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace VieriNavPlotter;
 
 internal sealed record BuiltInRouteTemplate(
@@ -13,9 +15,12 @@ internal sealed record BuiltInRouteTemplate(
     bool UseFlight = true,
     string Notes = "",
     float Tolerance = 0.75f,
-    float LastPointTolerance = 3f)
+    float LastPointTolerance = 3f,
+    RoutePoint? VendorPosition = null)
 {
     internal bool IsCompletePath => Points.Count >= 2;
+
+    internal Vector3 ResolvedVendorPosition => (VendorPosition ?? Points[^1]).Position;
 
     internal PlottedRoute CreateEditableCopy() => new()
     {
@@ -48,7 +53,8 @@ internal static class BuiltInRouteCatalog
         [
             Point(164.4264f, 15.5000f, -75.7035f),
             Point(157.5930f, 15.7000f, -69.3316f),
-        ], true, false, "The route approaches Domitien directly, then settles at the measured standing point in front of him. The NPC's wall-side object coordinate is intentionally not a movement point.", LastPointTolerance: 0.75f),
+        ], true, false, "The route approaches Domitien directly, then settles at the measured standing point in front of him. The NPC's wall-side object coordinate is intentionally not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(152.8512f, 15.5f, -71.9293f)),
         Destination("arr-geraint", "Geraint — weapons", "ARR cities", 133, 1000217, "Geraint", "1–49", 167.8366f, 15.5f, -76.9244f),
 
         Destination("hw-seghuie", "Seghuie — accessories", "Heavensward", 419, 1011200, "Seghuie", "50–60", -188.3116f, -12.5349f, -42.71f),
@@ -74,7 +80,8 @@ internal static class BuiltInRouteCatalog
             Point(77.75f, 5.25f, -74f),
             Point(56.78f, 5.15f, -73.87f),
             Point(42.9011f, 5.15f, -77.0043f),
-        ], false, false, "Reference copy of AutoDuty's staged lower-plaza, wall-corner, stair, upper-plaza, and vendor coordinates."),
+        ], false, false, "Reference copy of AutoDuty's staged lower-plaza, wall-corner, stair, upper-plaza, and vendor coordinates.",
+            VendorPosition: Point(42.9011f, 5.15f, -77.0043f)),
         Destination("ew-1037720", "Level 82 gear vendor", "Endwalker", 958, 1037720, "Gear vendor 1037720", "82", -429.1346f, 22.4812f, 450.393f),
         Destination("ew-1037791", "Level 84 gear vendor", "Endwalker", 959, 1037791, "Gear vendor 1037791", "84", -19.8631f, -132.9519f, -461.3871f),
         Destination("ew-1037907", "Level 86 gear vendor", "Endwalker", 961, 1037907, "Gear vendor 1037907", "86", 140.5236f, 10.3859f, 164.8957f),
@@ -90,7 +97,12 @@ internal static class BuiltInRouteCatalog
     private static BuiltInRouteTemplate Destination(string id, string name, string category, uint territoryId,
         uint targetDataId, string targetLabel, string levelBand, float x, float y, float z) =>
         new(id, name, category, territoryId, targetDataId, targetLabel, levelBand, [Point(x, y, z)], true, true,
-            "AutoDuty currently stores this as a vendor destination and lets travel/navmesh build the approach. Add or record approach points after copying it before enabling it as a custom override.");
+            "AutoDuty currently stores this as a vendor destination and lets travel/navmesh build the approach. Add or record approach points after copying it before enabling it as a custom override.",
+            VendorPosition: Point(x, y, z));
+
+    internal static Vector3? FindVendorPosition(uint territoryId, uint targetDataId) =>
+        All.FirstOrDefault(route => route.TerritoryId == territoryId && route.TargetDataId == targetDataId)
+            ?.ResolvedVendorPosition;
 
     private static RoutePoint Point(float x, float y, float z) => new() { X = x, Y = y, Z = z };
 }

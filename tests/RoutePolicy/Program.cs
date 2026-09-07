@@ -57,12 +57,39 @@ Check(domitien.Points[0].Position == new Vector3(164.4264f, 15.5000f, -75.7035f)
     "Domitien point 1 must retain the measured direct approach coordinate without an aisle overshoot.");
 Check(domitien.Points[^1].Position == new Vector3(157.5930f, 15.7000f, -69.3316f),
     "Domitien's final movement point must retain the measured in-game standing coordinate.");
+Check(domitien.ResolvedVendorPosition == new Vector3(152.8512f, 15.5f, -71.9293f),
+    "Domitien playback must retain the real NPC coordinate separately from its safe standing point.");
 Check(Vector3.Distance(domitien.Points[^1].Position, new Vector3(152.8512f, 15.5f, -71.9293f)) is > 5f and < 6f,
     "Domitien's final movement point must stand in front of the NPC instead of using his wall-side object coordinate.");
 Check(domitien.LastPointTolerance == 0.75f,
     "Domitien playback must use a stable sub-yalm arrival radius instead of fighting navmesh over its final fraction of a yalm.");
 Check(domitien.CreateEditableCopy().LastPointTolerance == domitien.LastPointTolerance,
     "Copying Domitien to My Routes must preserve its precise final-point tolerance.");
+BuiltInRouteTemplate faezghim = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1001205);
+Check(faezghim.ResolvedVendorPosition == faezghim.Points[0].Position,
+    "Destination-only vendor playback must carry the NPC coordinate into suite travel.");
+Check(BuiltInRouteCatalog.FindVendorPosition(faezghim.TerritoryId, faezghim.TargetDataId) == faezghim.ResolvedVendorPosition,
+    "Copied vendor routes must recover their trusted catalog coordinate from the binding.");
+using (JsonDocument vendorPlayback = JsonDocument.Parse(SuiteTravelRequestContract.Create(
+           faezghim.TerritoryId, faezghim.Points, faezghim.UseFlight, faezghim.UseMesh,
+           faezghim.Tolerance, faezghim.LastPointTolerance, false,
+           faezghim.TargetDataId, faezghim.ResolvedVendorPosition)))
+{
+    Check(vendorPlayback.RootElement.GetProperty("VendorTargetDataId").GetUInt32() == faezghim.TargetDataId,
+        "Built-in vendor playback must serialize the vendor target identity.");
+    Check(vendorPlayback.RootElement.GetProperty("VendorPosition").GetProperty("X").GetSingle() == faezghim.ResolvedVendorPosition.X,
+        "Built-in vendor playback must serialize the trusted vendor coordinate.");
+}
+using (JsonDocument startTravel = JsonDocument.Parse(SuiteTravelRequestContract.Create(
+           domitien.TerritoryId, domitien.Points, domitien.UseFlight, domitien.UseMesh,
+           domitien.Tolerance, domitien.LastPointTolerance, true,
+           domitien.TargetDataId, domitien.ResolvedVendorPosition)))
+{
+    Check(startTravel.RootElement.GetProperty("VendorTargetDataId").GetUInt32() == 0,
+        "Travel to Start on a multi-point path must not finish early against the vendor.");
+    Check(startTravel.RootElement.GetProperty("VendorPosition").ValueKind == JsonValueKind.Null,
+        "Travel to Start must not carry a final vendor coordinate.");
+}
 Check(!NavigationVisualizationPolicy.ShouldDraw(true, false, false),
     "Unrelated vnavmesh activity must never be drawn without an explicit owner.");
 Check(NavigationVisualizationPolicy.ShouldDraw(true, true, false),
