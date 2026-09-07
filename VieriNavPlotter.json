@@ -3,10 +3,9 @@
   "Name": "VieriNavPlotter",
   "InternalName": "VieriNavPlotter",
   "Punchline": "Record, plot, preview, and reuse precise navigation routes.",
-  "Description": "Creates named routes by timed recording or manual point placement, previews connected paths in the world, tests them through vnavmesh, and provides opt-in travel overrides to the Vieri suite.",
+  "Description": "Creates named routes by timed recording or manual point placement, shows connected paths in the world, travels to route starts, plays complete routes through VieriAutoDuty and vnavmesh, and provides opt-in travel overrides to the Vieri suite.",
   "IconUrl": "https://www.thedailypilcrow.com/dalamud/assets/VieriLogo.png",
   "ApplicableVersion": "any",
   "DalamudApiLevel": 15,
   "Tags": [ "navigation", "automation", "routes", "utility" ]
 }
-

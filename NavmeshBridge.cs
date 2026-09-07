@@ -45,10 +45,33 @@ internal sealed class NavmeshBridge
         }
     }
 
+    internal bool TryMove(IReadOnlyList<RoutePoint> points, bool useFlight, float tolerance, out string message)
+    {
+        if (points.Count == 0)
+        {
+            message = "The route has no points.";
+            return false;
+        }
+
+        try
+        {
+            if (!isReady.InvokeFunc()) { message = "vnavmesh is not ready."; return false; }
+            setTolerance.InvokeAction(Math.Clamp(tolerance, 0.1f, 20f));
+            moveTo.InvokeAction(points.Select(point => point.Position).ToList(), useFlight);
+            message = $"Local route playback started ({points.Count} point{(points.Count == 1 ? string.Empty : "s")}).";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            log.Warning(ex, "Could not start local route playback.");
+            message = "Could not start local vnavmesh playback.";
+            return false;
+        }
+    }
+
     internal void Stop()
     {
         try { stop.InvokeAction(); }
         catch (Exception ex) { log.Debug(ex, "vnavmesh stop was unavailable."); }
     }
 }
-

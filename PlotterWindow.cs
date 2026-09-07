@@ -9,6 +9,7 @@ internal sealed class PlotterWindow : Window
 {
     private readonly Configuration config;
     private readonly NavmeshBridge navmesh;
+    private readonly SuiteTravelBridge suiteTravel;
     private bool recording;
     private long nextCaptureAt;
     private string status = "Create a route, then record or add points manually.";
@@ -17,12 +18,15 @@ internal sealed class PlotterWindow : Window
     private int selectedPoint = -1;
     private bool showBuiltIns = true;
     private string selectedTemplateId = "arr-domitien";
+    private string? previewTemplateId;
+    private Guid? previewRouteId;
 
-    internal PlotterWindow(Configuration config, NavmeshBridge navmesh)
+    internal PlotterWindow(Configuration config, NavmeshBridge navmesh, SuiteTravelBridge suiteTravel)
         : base("VieriNavPlotter###VieriNavPlotter", ImGuiWindowFlags.NoScrollbar)
     {
         this.config = config;
         this.navmesh = navmesh;
+        this.suiteTravel = suiteTravel;
         Size = new Vector2(900, 600);
         SizeCondition = ImGuiCond.FirstUseEver;
         SizeConstraints = new WindowSizeConstraints { MinimumSize = new Vector2(720, 460), MaximumSize = new Vector2(1800, 1200) };
@@ -131,13 +135,16 @@ internal sealed class PlotterWindow : Window
         bool flight = route.UseFlight;
         if (ImGui.Checkbox("Allow flight", ref flight)) { route.UseFlight = flight; Changed(route); }
         ImGui.TextDisabled("For exact halls and vendor approaches, leave mesh-assisted off. Every saved point is then followed in order.");
-        if (ImGui.Button("Test route"))
-        {
-            if (Plugin.ClientState.TerritoryType != route.TerritoryId) status = "Travel to the route's territory before testing it.";
-            else if (Plugin.Objects.LocalPlayer is { } player) navmesh.TryPlay(route, player.Position, out status);
-        }
+        bool showingRoute = previewRouteId == route.Id;
+        if (ImGui.Button(showingRoute ? "Hide Route" : "Show Route")) TogglePreview(route);
         ImGui.SameLine();
-        if (ImGui.Button("Stop playback")) { navmesh.Stop(); status = "Playback stopped."; }
+        if (ImGui.Button("Travel to Start")) DispatchRoute(route.Name, route.TerritoryId, route.Points,
+                route.UseFlight, route.UseMesh, route.Tolerance, route.LastPointTolerance, travelOnly: true);
+        ImGui.SameLine();
+        if (ImGui.Button("Play Route")) DispatchRoute(route.Name, route.TerritoryId, route.Points,
+                route.UseFlight, route.UseMesh, route.Tolerance, route.LastPointTolerance, travelOnly: false);
+        ImGui.SameLine();
+        if (ImGui.Button("Stop Playback")) StopPlayback();
 
         Section("Optional automation assignment");
         ImGui.TextWrapped("Named routes are always available to VieriCodex, VieriNexus, and future Vieri modules through the shared route library. An assignment additionally replaces one exact built-in destination.");
@@ -212,45 +219,65 @@ internal sealed class PlotterWindow : Window
         if (!config.ShowWorldPreview) return;
         IReadOnlyList<RoutePoint> points;
         uint territoryId;
-        if (showBuiltIns)
+        string routeName;
+        bool completePath;
+        if (previewTemplateId is { } templateId)
         {
-            BuiltInRouteTemplate? template = BuiltInRouteCatalog.All.FirstOrDefault(item => item.Id == selectedTemplateId);
+            BuiltInRouteTemplate? template = BuiltInRouteCatalog.All.FirstOrDefault(item => item.Id == templateId);
             if (template is null) return;
             points = template.Points;
             territoryId = template.TerritoryId;
+            routeName = template.Name;
+            completePath = template.IsCompletePath;
         }
-        else
+        else if (previewRouteId is { } routeId)
         {
-            if (Selected is not { } route) return;
+            PlottedRoute? route = config.Routes.FirstOrDefault(item => item.Id == routeId);
+            if (route is null) { previewRouteId = null; return; }
             points = route.Points;
             territoryId = route.TerritoryId;
+            routeName = route.Name;
+            completePath = points.Count >= 2;
         }
+        else return;
         if (territoryId != Plugin.ClientState.TerritoryType) return;
         var draw = ImGui.GetForegroundDrawList();
         uint lineColor = ImGui.GetColorU32(new Vector4(0.95f, 0.18f, 0.18f, 0.9f));
+        uint guideColor = ImGui.GetColorU32(new Vector4(1f, 0.62f, 0.12f, 0.85f));
         uint pointColor = ImGui.GetColorU32(new Vector4(1f, 0.75f, 0.15f, 1f));
         Vector2? previous = null;
+        if (!completePath && points.Count == 1 && Plugin.Objects.LocalPlayer is { } player &&
+            Plugin.GameGui.WorldToScreen(player.Position, out Vector2 playerScreen) &&
+            Plugin.GameGui.WorldToScreen(points[0].Position, out Vector2 destinationScreen))
+            draw.AddLine(playerScreen, destinationScreen, guideColor, 2.5f);
         for (int i = 0; i < points.Count; i++)
         {
             if (!Plugin.GameGui.WorldToScreen(points[i].Position, out Vector2 screen)) { previous = null; continue; }
             if (previous is { } prior) draw.AddLine(prior, screen, lineColor, 3f);
             draw.AddCircleFilled(screen, i == 0 ? 7f : 5f, pointColor);
             if (config.ShowPointNumbers) draw.AddText(screen + new Vector2(7, -8), pointColor, (i + 1).ToString());
+            if (i == 0) draw.AddText(screen + new Vector2(10, 8), pointColor,
+                completePath ? routeName : $"{routeName} (generated approach)");
             previous = screen;
         }
     }
 
     internal void Suspend() { if (recording) StopRecording(); }
-    internal void StopAll() { StopRecording(); navmesh.Stop(); config.Save(); }
-    internal void StopPlayback() { navmesh.Stop(); status = "Playback stopped."; }
+    internal void StopAll() { StopRecording(); suiteTravel.Stop(); navmesh.Stop(); config.Save(); }
+    internal void StopPlayback()
+    {
+        bool stoppedSuiteTravel = suiteTravel.Stop();
+        navmesh.Stop();
+        status = stoppedSuiteTravel ? "AutoDuty route travel stopped." : "Playback stopped.";
+    }
     internal void PlayNamedRoute(string nameOrId)
     {
         PlottedRoute? route = RoutePolicy.FindByNameOrId(config.Routes, nameOrId);
         if (route is null) { Plugin.Chat.PrintError($"[VieriNavPlotter] Route '{nameOrId}' was not found."); return; }
         config.SelectedRouteId = route.Id;
-        if (Plugin.ClientState.TerritoryType != route.TerritoryId) status = $"Route '{route.Name}' belongs to territory {route.TerritoryId}.";
-        else if (Plugin.Objects.LocalPlayer is { } player) navmesh.TryPlay(route, player.Position, out status);
-        Plugin.Chat.Print($"[VieriNavPlotter] {status}");
+        showBuiltIns = false;
+        DispatchRoute(route.Name, route.TerritoryId, route.Points, route.UseFlight, route.UseMesh,
+            route.Tolerance, route.LastPointTolerance, travelOnly: false);
     }
 
     private void CreateRoute()
@@ -336,6 +363,24 @@ internal sealed class PlotterWindow : Window
             status = template.IsCompletePath ? "Built-in path copied. Test it before enabling the override." : "Destination copied. Add the safe approach points before playback or override use.";
         }
 
+        Section("Review and playback");
+        bool showingRoute = previewTemplateId == template.Id;
+        if (ImGui.Button(showingRoute ? "Hide Route" : "Show Route")) TogglePreview(template);
+        ImGui.SameLine();
+        if (ImGui.Button(template.IsCompletePath ? "Travel to Start" : "Travel to Destination"))
+            DispatchRoute(template.Name, template.TerritoryId, template.Points, template.UseFlight,
+                template.UseMesh, 0.75f, 3f, travelOnly: true);
+        ImGui.SameLine();
+        if (ImGui.Button("Play Route"))
+            DispatchRoute(template.Name, template.TerritoryId, template.Points, template.UseFlight,
+                template.UseMesh, 0.75f, 3f, travelOnly: false);
+        ImGui.SameLine();
+        if (ImGui.Button("Stop Playback")) StopPlayback();
+        ImGui.TextDisabled(template.IsCompletePath
+            ? "Play follows every saved point in order. Travel only takes you to point 1."
+            : "This entry stores one destination; Play uses AutoDuty to generate the safe approach.");
+        ImGui.TextWrapped(status);
+
         Section("Stored points");
         for (int i = 0; i < template.Points.Count; i++)
         {
@@ -363,7 +408,9 @@ internal sealed class PlotterWindow : Window
         ImGui.TextUnformatted("Delete this route permanently?");
         if (ImGui.Button("Delete") && pendingDelete is { } id)
         {
-            config.Routes.RemoveAll(route => route.Id == id); config.SelectedRouteId = config.Routes.FirstOrDefault()?.Id; config.Save(); pendingDelete = null; recording = false; ImGui.CloseCurrentPopup();
+            config.Routes.RemoveAll(route => route.Id == id); config.SelectedRouteId = config.Routes.FirstOrDefault()?.Id;
+            if (previewRouteId == id) previewRouteId = null;
+            config.Save(); pendingDelete = null; recording = false; ImGui.CloseCurrentPopup();
         }
         ImGui.SameLine();
         if (ImGui.Button("Cancel")) { pendingDelete = null; ImGui.CloseCurrentPopup(); }
@@ -371,6 +418,66 @@ internal sealed class PlotterWindow : Window
     }
 
     private void Changed(PlottedRoute route) { route.UpdatedAtUtc = DateTime.UtcNow; config.Save(); }
+
+    private void TogglePreview(PlottedRoute route)
+    {
+        bool hide = previewRouteId == route.Id;
+        previewTemplateId = null;
+        previewRouteId = hide ? null : route.Id;
+        if (!hide) config.ShowWorldPreview = true;
+        config.Save();
+        status = hide ? $"Hidden {route.Name}." : PreviewStatus(route.Name, route.TerritoryId, route.Points.Count >= 2);
+    }
+
+    private void TogglePreview(BuiltInRouteTemplate route)
+    {
+        bool hide = previewTemplateId == route.Id;
+        previewRouteId = null;
+        previewTemplateId = hide ? null : route.Id;
+        if (!hide) config.ShowWorldPreview = true;
+        config.Save();
+        status = hide ? $"Hidden {route.Name}." : PreviewStatus(route.Name, route.TerritoryId, route.IsCompletePath);
+    }
+
+    private static string PreviewStatus(string name, uint territoryId, bool completePath)
+    {
+        if (Plugin.ClientState.TerritoryType != territoryId)
+            return $"{name} is selected for review. Travel to territory {territoryId} to see it in the world.";
+        return completePath
+            ? $"Showing every saved segment for {name}."
+            : $"Showing the destination guide for {name}; AutoDuty generates the actual navmesh approach.";
+    }
+
+    private void DispatchRoute(string name, uint territoryId, IReadOnlyList<RoutePoint> points, bool useFlight,
+        bool useMesh, float tolerance, float lastPointTolerance, bool travelOnly)
+    {
+        if (points.Count == 0)
+        {
+            status = $"{name} has no saved points.";
+            Plugin.Chat.PrintError($"[VieriNavPlotter] {status}");
+            return;
+        }
+
+        RouteDispatchResult dispatch = suiteTravel.Dispatch(territoryId, points, useFlight, useMesh,
+            tolerance, lastPointTolerance, travelOnly);
+        if (dispatch.Handled)
+        {
+            status = dispatch.Message;
+        }
+        else if (Plugin.ClientState.TerritoryType != territoryId)
+        {
+            status = "Cross-zone route playback requires the current VieriAutoDuty update.";
+        }
+        else
+        {
+            IReadOnlyList<RoutePoint> localPoints = travelOnly ? [points[0]] : points;
+            navmesh.TryMove(localPoints, useFlight, tolerance, out status);
+        }
+
+        if (dispatch.Handled && !dispatch.Started) Plugin.Chat.PrintError($"[VieriNavPlotter] {status}");
+        else Plugin.Chat.Print($"[VieriNavPlotter] {status}");
+    }
+
     private static float RouteLength(PlottedRoute route) => route.Points.Zip(route.Points.Skip(1), (a, b) => Vector3.Distance(a.Position, b.Position)).Sum();
     private bool MatchesSearch(PlottedRoute route) => string.IsNullOrWhiteSpace(search) ||
         route.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || route.Tags.Contains(search, StringComparison.OrdinalIgnoreCase) ||

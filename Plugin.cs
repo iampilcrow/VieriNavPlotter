@@ -31,7 +31,8 @@ public sealed class Plugin : IDalamudPlugin
         var config = Pi.GetPluginConfig() as Configuration ?? new Configuration();
         config.Initialize(Pi);
         var navmesh = new NavmeshBridge(Pi, Log);
-        window = new PlotterWindow(config, navmesh);
+        var suiteTravel = new SuiteTravelBridge(Pi, Log);
+        window = new PlotterWindow(config, navmesh, suiteTravel);
         windows.AddWindow(window);
         ipc = new RouteIpcProvider(Pi, config, navmesh);
         Commands.AddHandler("/vierinavplotter", new CommandInfo(OnCommand) { HelpMessage = "Open VieriNavPlotter. Alias: /vnp" });
