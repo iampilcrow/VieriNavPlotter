@@ -15,6 +15,8 @@ internal sealed class PlotterWindow : Window
     private Guid? pendingDelete;
     private string search = string.Empty;
     private int selectedPoint = -1;
+    private bool showBuiltIns = true;
+    private string selectedTemplateId = "arr-domitien";
 
     internal PlotterWindow(Configuration config, NavmeshBridge navmesh)
         : base("VieriNavPlotter###VieriNavPlotter", ImGuiWindowFlags.NoScrollbar)
@@ -52,9 +54,17 @@ internal sealed class PlotterWindow : Window
     private void DrawLibrary()
     {
         if (ImGui.Button("+ New route", new Vector2(-1, 0))) CreateRoute();
+        if (ImGui.Button("Built-in vendor paths", new Vector2(118, 0))) showBuiltIns = true;
+        ImGui.SameLine();
+        if (ImGui.Button("My routes", new Vector2(-1, 0))) showBuiltIns = false;
         ImGui.SetNextItemWidth(-1);
         ImGui.InputTextWithHint("##RouteSearch", "Search names, tags, notes...", ref search, 100);
         ImGui.Spacing();
+        if (showBuiltIns)
+        {
+            DrawBuiltInLibrary();
+            return;
+        }
         foreach (PlottedRoute route in config.Routes.Where(MatchesSearch).OrderBy(route => route.Name))
         {
             bool selected = route.Id == config.SelectedRouteId;
@@ -64,11 +74,16 @@ internal sealed class PlotterWindow : Window
             if (route.OverrideEnabled)
                 ImGui.TextColored(ImGuiColors.HealerGreen, $"  ↳ {route.BindingKind}: {route.TargetLabel}");
         }
-        if (config.Routes.Count == 0) ImGui.TextWrapped("No routes yet. Create one wherever you want the path to begin.");
+        if (config.Routes.Count == 0) ImGui.TextWrapped("Your personal library is empty. Use New route or copy a built-in vendor template.");
     }
 
     private void DrawEditor()
     {
+        if (showBuiltIns)
+        {
+            DrawBuiltInDetails();
+            return;
+        }
         PlottedRoute? route = Selected;
         if (route is null) { ImGui.TextDisabled("Select or create a route."); return; }
 
@@ -194,14 +209,30 @@ internal sealed class PlotterWindow : Window
 
     internal void DrawWorldPreview()
     {
-        if (!config.ShowWorldPreview || Selected is not { } route || route.TerritoryId != Plugin.ClientState.TerritoryType) return;
+        if (!config.ShowWorldPreview) return;
+        IReadOnlyList<RoutePoint> points;
+        uint territoryId;
+        if (showBuiltIns)
+        {
+            BuiltInRouteTemplate? template = BuiltInRouteCatalog.All.FirstOrDefault(item => item.Id == selectedTemplateId);
+            if (template is null) return;
+            points = template.Points;
+            territoryId = template.TerritoryId;
+        }
+        else
+        {
+            if (Selected is not { } route) return;
+            points = route.Points;
+            territoryId = route.TerritoryId;
+        }
+        if (territoryId != Plugin.ClientState.TerritoryType) return;
         var draw = ImGui.GetForegroundDrawList();
         uint lineColor = ImGui.GetColorU32(new Vector4(0.95f, 0.18f, 0.18f, 0.9f));
         uint pointColor = ImGui.GetColorU32(new Vector4(1f, 0.75f, 0.15f, 1f));
         Vector2? previous = null;
-        for (int i = 0; i < route.Points.Count; i++)
+        for (int i = 0; i < points.Count; i++)
         {
-            if (!Plugin.GameGui.WorldToScreen(route.Points[i].Position, out Vector2 screen)) { previous = null; continue; }
+            if (!Plugin.GameGui.WorldToScreen(points[i].Position, out Vector2 screen)) { previous = null; continue; }
             if (previous is { } prior) draw.AddLine(prior, screen, lineColor, 3f);
             draw.AddCircleFilled(screen, i == 0 ? 7f : 5f, pointColor);
             if (config.ShowPointNumbers) draw.AddText(screen + new Vector2(7, -8), pointColor, (i + 1).ToString());
@@ -225,7 +256,7 @@ internal sealed class PlotterWindow : Window
     private void CreateRoute()
     {
         var route = new PlottedRoute { Name = $"Route {config.Routes.Count + 1}", TerritoryId = Plugin.ClientState.TerritoryType };
-        config.Routes.Add(route); config.SelectedRouteId = route.Id; selectedPoint = -1; config.Save(); status = "Route created. Add the first point or start recording.";
+        config.Routes.Add(route); config.SelectedRouteId = route.Id; selectedPoint = -1; showBuiltIns = false; config.Save(); status = "Route created. Add the first point or start recording.";
     }
 
     private void StartRecording(PlottedRoute route)
@@ -263,6 +294,56 @@ internal sealed class PlotterWindow : Window
         config.Routes.Add(copy); config.SelectedRouteId = copy.Id; config.Save();
     }
 
+    private void DrawBuiltInLibrary()
+    {
+        string? category = null;
+        foreach (BuiltInRouteTemplate template in BuiltInRouteCatalog.All.Where(MatchesSearch))
+        {
+            if (category != template.Category)
+            {
+                category = template.Category;
+                ImGui.TextColored(new Vector4(0.95f, 0.65f, 0.2f, 1), category);
+            }
+            if (ImGui.Selectable($"{template.Name}##template-{template.Id}", selectedTemplateId == template.Id))
+                selectedTemplateId = template.Id;
+            ImGui.TextDisabled(template.IsCompletePath
+                ? $"  {template.Points.Count} points • Lv. {template.LevelBand}"
+                : $"  destination • Lv. {template.LevelBand}");
+        }
+    }
+
+    private void DrawBuiltInDetails()
+    {
+        BuiltInRouteTemplate template = BuiltInRouteCatalog.All.FirstOrDefault(item => item.Id == selectedTemplateId)
+                                           ?? BuiltInRouteCatalog.All[0];
+        ImGui.TextColored(new Vector4(1f, 0.86f, 0.86f, 1), template.Name);
+        ImGui.TextDisabled($"Built-in AutoDuty catalog • {template.Category} • Level {template.LevelBand}");
+        ImGui.Spacing();
+        ImGui.TextUnformatted($"Territory: {template.TerritoryId}");
+        ImGui.TextUnformatted($"Vendor: {template.TargetLabel} ({template.TargetDataId})");
+        ImGui.TextUnformatted(template.IsCompletePath ? $"Authored path: {template.Points.Count} points" : "Stored behavior: destination plus generated navmesh approach");
+        ImGui.TextWrapped(template.Notes);
+        ImGui.Spacing();
+        if (!template.IsCompletePath)
+            ImGui.TextColored(new Vector4(0.95f, 0.72f, 0.2f, 1), "This is a destination template, not a proven multi-point path. Copy it, then record or add the safe approach you want.");
+        else
+            ImGui.TextColored(ImGuiColors.HealerGreen, "This entry contains AutoDuty's current authored multi-point coordinates.");
+
+        if (ImGui.Button("Copy to My Routes", new Vector2(190, 34)))
+        {
+            PlottedRoute route = template.CreateEditableCopy();
+            config.Routes.Add(route); config.SelectedRouteId = route.Id; showBuiltIns = false; selectedPoint = -1; config.Save();
+            status = template.IsCompletePath ? "Built-in path copied. Test it before enabling the override." : "Destination copied. Add the safe approach points before playback or override use.";
+        }
+
+        Section("Stored points");
+        for (int i = 0; i < template.Points.Count; i++)
+        {
+            RoutePoint point = template.Points[i];
+            ImGui.TextUnformatted($"{i + 1,3}.  X {point.X,8:F2}   Y {point.Y,8:F2}   Z {point.Z,8:F2}");
+        }
+    }
+
     private void ImportClipboard()
     {
         try
@@ -294,5 +375,9 @@ internal sealed class PlotterWindow : Window
     private bool MatchesSearch(PlottedRoute route) => string.IsNullOrWhiteSpace(search) ||
         route.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || route.Tags.Contains(search, StringComparison.OrdinalIgnoreCase) ||
         route.Notes.Contains(search, StringComparison.OrdinalIgnoreCase);
+    private bool MatchesSearch(BuiltInRouteTemplate route) => string.IsNullOrWhiteSpace(search) ||
+        route.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || route.Category.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+        route.TargetLabel.Contains(search, StringComparison.OrdinalIgnoreCase) || route.LevelBand.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+        route.TargetDataId.ToString().Contains(search, StringComparison.OrdinalIgnoreCase);
     private static void Section(string title) { ImGui.Spacing(); ImGui.Separator(); ImGui.TextColored(new Vector4(0.95f, 0.65f, 0.2f, 1), title); }
 }

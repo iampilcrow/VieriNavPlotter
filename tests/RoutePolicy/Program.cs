@@ -42,5 +42,14 @@ Check(RoutePolicy.FindByNameOrId([valid], "hall TO VENDOR") == valid, "Named loo
 Check(RoutePolicy.FindByNameOrId([valid], valid.Id.ToString()) == valid, "ID lookup must work.");
 valid.Points[0].X = float.NaN;
 Check(!RoutePolicy.IsValid(valid), "Non-finite coordinates must be rejected.");
+Check(BuiltInRouteCatalog.All.Count == 27, "All 27 distinct AutoDuty gear vendors must be represented.");
+Check(BuiltInRouteCatalog.All.Select(route => (route.TerritoryId, route.TargetDataId)).Distinct().Count() == 27,
+    "Built-in vendor bindings must be unique.");
+Check(BuiltInRouteCatalog.All.Count(route => route.IsCompletePath) == 2,
+    "Only the two existing authored multi-point vendor approaches may be presented as complete paths.");
+Check(BuiltInRouteCatalog.All.Where(route => route.IsCompletePath).All(route => RoutePolicy.IsValid(route.CreateEditableCopy())),
+    "Every complete built-in template must produce a valid editable route.");
+Check(BuiltInRouteCatalog.All.Where(route => !route.IsCompletePath).All(route => !RoutePolicy.IsValid(route.CreateEditableCopy())),
+    "Destination-only templates must not silently become enabled route overrides.");
 
 Console.WriteLine($"VieriNavPlotter RoutePolicy: {checks} checks passed.");
