@@ -65,6 +65,13 @@ Check(domitien.LastPointTolerance == 0.75f,
     "Domitien playback must use a stable sub-yalm arrival radius instead of fighting navmesh over its final fraction of a yalm.");
 Check(domitien.CreateEditableCopy().LastPointTolerance == domitien.LastPointTolerance,
     "Copying Domitien to My Routes must preserve its precise final-point tolerance.");
+BuiltInRouteTemplate geraint = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1000217);
+Check(geraint.Points.Count == 1 && geraint.Points[0].Position == new Vector3(168.4092f, 15.6999f, -73.9508f),
+    "Geraint must use the measured walkable standing point in front of his counter.");
+Check(geraint.ResolvedVendorPosition == new Vector3(167.8366f, 15.5f, -76.9244f),
+    "Geraint must retain his real NPC coordinate separately for native interaction checks.");
+Check(geraint.LastPointTolerance == 0.75f,
+    "Geraint playback must settle at the authored standing point without a wide early stop.");
 BuiltInRouteTemplate faezghim = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1001205);
 Check(faezghim.ResolvedVendorPosition == faezghim.Points[0].Position,
     "Destination-only vendor playback must carry the NPC coordinate into suite travel.");

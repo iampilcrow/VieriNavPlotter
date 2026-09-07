@@ -55,7 +55,11 @@ internal static class BuiltInRouteCatalog
             Point(157.5930f, 15.7000f, -69.3316f),
         ], true, false, "The route approaches Domitien directly, then settles at the measured standing point in front of him. The NPC's wall-side object coordinate is intentionally not a movement point.", LastPointTolerance: 0.75f,
             VendorPosition: Point(152.8512f, 15.5f, -71.9293f)),
-        Destination("arr-geraint", "Geraint — weapons", "ARR cities", 133, 1000217, "Geraint", "1–49", 167.8366f, 15.5f, -76.9244f),
+        new("arr-geraint", "Geraint — weapons", "ARR cities", 133, 1000217, "Geraint", "1–49",
+        [
+            Point(168.4092f, 15.6999f, -73.9508f),
+        ], true, false, "Uses the measured walkable standing point directly in front of Geraint's counter. The NPC's behind-counter object coordinate is retained for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(167.8366f, 15.5f, -76.9244f)),
 
         Destination("hw-seghuie", "Seghuie — accessories", "Heavensward", 419, 1011200, "Seghuie", "50–60", -188.3116f, -12.5349f, -42.71f),
         Destination("hw-elbert", "Elbert — weapons", "Heavensward", 419, 1011203, "Elbert", "50–60", -214.3844f, -16.0349f, -62.4175f),
