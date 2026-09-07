@@ -65,6 +65,20 @@ Check(domitien.LastPointTolerance == 0.75f,
     "Domitien playback must use a stable sub-yalm arrival radius instead of fighting navmesh over its final fraction of a yalm.");
 Check(domitien.CreateEditableCopy().LastPointTolerance == domitien.LastPointTolerance,
     "Copying Domitien to My Routes must preserve its precise final-point tolerance.");
+BuiltInRouteTemplate ironThunder = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1001203);
+Check(ironThunder.Points.Count == 1 && ironThunder.Points[0].Position == new Vector3(-155.3658f, 18.2000f, 23.3950f),
+    "Iron Thunder must use the measured walkable standing point in front of his counter.");
+Check(ironThunder.ResolvedVendorPosition == new Vector3(-156.6034f, 18.2f, 20.92f),
+    "Iron Thunder must retain his real NPC coordinate separately for native interaction checks.");
+Check(ironThunder.LastPointTolerance == 0.75f,
+    "Iron Thunder playback must settle at the authored standing point without a wide early stop.");
+BuiltInRouteTemplate sorcha = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1001202);
+Check(sorcha.Points.Count == 1 && sorcha.Points[0].Position == new Vector3(-135.1727f, 18.2000f, 14.8682f),
+    "Sorcha must use the measured walkable standing point in front of her counter.");
+Check(sorcha.ResolvedVendorPosition == new Vector3(-136.1650f, 18.1734f, 12.2894f),
+    "Sorcha must retain her real NPC coordinate separately for native interaction checks.");
+Check(sorcha.LastPointTolerance == 0.75f,
+    "Sorcha playback must settle at the authored standing point without a wide early stop.");
 BuiltInRouteTemplate geraint = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1000217);
 Check(geraint.Points.Count == 1 && geraint.Points[0].Position == new Vector3(168.4092f, 15.6999f, -73.9508f),
     "Geraint must use the measured walkable standing point in front of his counter.");
@@ -73,8 +87,12 @@ Check(geraint.ResolvedVendorPosition == new Vector3(167.8366f, 15.5f, -76.9244f)
 Check(geraint.LastPointTolerance == 0.75f,
     "Geraint playback must settle at the authored standing point without a wide early stop.");
 BuiltInRouteTemplate faezghim = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1001205);
-Check(faezghim.ResolvedVendorPosition == faezghim.Points[0].Position,
-    "Destination-only vendor playback must carry the NPC coordinate into suite travel.");
+Check(faezghim.Points.Count == 1 && faezghim.Points[0].Position == new Vector3(-236.5439f, 16.2000f, 40.3006f),
+    "Faezghim must use the measured walkable standing point in front of his counter.");
+Check(faezghim.ResolvedVendorPosition == new Vector3(-236.1034f, 16f, 36.92f),
+    "Faezghim must retain his real NPC coordinate separately for native interaction checks.");
+Check(faezghim.LastPointTolerance == 0.75f,
+    "Faezghim playback must settle at the authored standing point without a wide early stop.");
 Check(BuiltInRouteCatalog.FindVendorPosition(faezghim.TerritoryId, faezghim.TargetDataId) == faezghim.ResolvedVendorPosition,
     "Copied vendor routes must recover their trusted catalog coordinate from the binding.");
 using (JsonDocument vendorPlayback = JsonDocument.Parse(SuiteTravelRequestContract.Create(

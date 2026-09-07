@@ -46,9 +46,21 @@ internal static class BuiltInRouteCatalog
 {
     internal static IReadOnlyList<BuiltInRouteTemplate> All { get; } =
     [
-        Destination("arr-iron-thunder", "Iron Thunder — armor", "ARR cities", 129, 1001203, "Iron Thunder", "1–49", -156.6034f, 18.2f, 20.92f),
-        Destination("arr-faezghim", "Faezghim — weapons", "ARR cities", 129, 1001205, "Faezghim", "1–49", -236.1034f, 16f, 36.92f),
-        Destination("arr-sorcha", "Sorcha — accessories", "ARR cities", 129, 1001202, "Sorcha", "1–49", -136.1650f, 18.1734f, 12.2894f),
+        new("arr-iron-thunder", "Iron Thunder — armor", "ARR cities", 129, 1001203, "Iron Thunder", "1–49",
+        [
+            Point(-155.3658f, 18.2000f, 23.3950f),
+        ], true, false, "Uses the measured walkable standing point directly in front of Iron Thunder. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-156.6034f, 18.2f, 20.92f)),
+        new("arr-faezghim", "Faezghim — weapons", "ARR cities", 129, 1001205, "Faezghim", "1–49",
+        [
+            Point(-236.5439f, 16.2000f, 40.3006f),
+        ], true, false, "Uses the measured walkable standing point directly in front of Faezghim. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-236.1034f, 16f, 36.92f)),
+        new("arr-sorcha", "Sorcha — accessories", "ARR cities", 129, 1001202, "Sorcha", "1–49",
+        [
+            Point(-135.1727f, 18.2000f, 14.8682f),
+        ], true, false, "Uses the measured walkable standing point directly in front of Sorcha. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-136.1650f, 18.1734f, 12.2894f)),
         new("arr-domitien", "Domitien — Ebony Stalls hall", "ARR cities", 133, 1000215, "Domitien", "1–49",
         [
             Point(164.4264f, 15.5000f, -75.7035f),
