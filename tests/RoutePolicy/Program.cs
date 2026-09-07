@@ -63,5 +63,13 @@ Check(domitien.LastPointTolerance == 0.75f,
     "Domitien playback must use a stable sub-yalm arrival radius instead of fighting navmesh over its final fraction of a yalm.");
 Check(domitien.CreateEditableCopy().LastPointTolerance == domitien.LastPointTolerance,
     "Copying Domitien to My Routes must preserve its precise final-point tolerance.");
+Check(!NavigationVisualizationPolicy.ShouldDraw(true, false, false),
+    "Unrelated vnavmesh activity must never be drawn without an explicit owner.");
+Check(NavigationVisualizationPolicy.ShouldDraw(true, true, false),
+    "Locally initiated NavPlotter playback must be eligible for live waypoint drawing.");
+Check(NavigationVisualizationPolicy.ShouldDraw(true, false, true),
+    "Explicitly authorized gear-shopping and suite route travel must be eligible for live waypoint drawing.");
+Check(!NavigationVisualizationPolicy.ShouldDraw(false, true, true),
+    "The user's live-waypoint setting must remain authoritative for owned navigation.");
 
 Console.WriteLine($"VieriNavPlotter RoutePolicy: {checks} checks passed.");

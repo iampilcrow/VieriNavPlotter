@@ -154,6 +154,7 @@ internal sealed class PlotterWindow : Window
         ImGui.SameLine();
         bool liveNavigation = config.ShowLiveNavigationPath;
         if (ImGui.Checkbox("Live navigation waypoints", ref liveNavigation)) { config.ShowLiveNavigationPath = liveNavigation; config.Save(); }
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Shown only for VieriNavPlotter playback and gear-shopping travel.");
 
         Section("Playback");
         bool mesh = route.UseMesh;
@@ -244,8 +245,10 @@ internal sealed class PlotterWindow : Window
     internal void DrawWorldPreview()
     {
         var draw = ImGui.GetForegroundDrawList();
-        if (config.ShowLiveNavigationPath)
-            DrawLiveNavigationPath(draw);
+        bool suiteAuthorizesNavigation = suiteTravel.IsVisualizationAuthorized();
+        if (NavigationVisualizationPolicy.ShouldDraw(config.ShowLiveNavigationPath,
+                navmesh.OwnsNavigationVisualization, suiteAuthorizesNavigation))
+            DrawLiveNavigationPath(draw, suiteAuthorizesNavigation);
         if (!config.ShowWorldPreview) return;
         IReadOnlyList<RoutePoint> points;
         uint territoryId;
@@ -291,12 +294,12 @@ internal sealed class PlotterWindow : Window
         }
     }
 
-    private void DrawLiveNavigationPath(ImDrawListPtr draw)
+    private void DrawLiveNavigationPath(ImDrawListPtr draw, bool suiteAuthorizesNavigation)
     {
         if (Plugin.Objects.LocalPlayer is not { } player)
             return;
 
-        IReadOnlyList<Vector3> waypoints = navmesh.GetActiveWaypoints();
+        IReadOnlyList<Vector3> waypoints = navmesh.GetActiveWaypoints(suiteAuthorizesNavigation);
         if (waypoints.Count == 0)
             return;
 
@@ -447,6 +450,7 @@ internal sealed class PlotterWindow : Window
             config.ShowLiveNavigationPath = liveNavigation;
             config.Save();
         }
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Shown only for VieriNavPlotter playback and gear-shopping travel.");
 
         Section("Stored points");
         for (int i = 0; i < template.Points.Count; i++)

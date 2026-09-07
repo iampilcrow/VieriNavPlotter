@@ -11,6 +11,7 @@ internal sealed class SuiteTravelBridge
 {
     private readonly ICallGateSubscriber<string, string> travelRoute;
     private readonly ICallGateSubscriber<bool> stopRoute;
+    private readonly ICallGateSubscriber<bool> isVisualizationActive;
     private readonly IPluginLog log;
 
     internal SuiteTravelBridge(IDalamudPluginInterface pi, IPluginLog log)
@@ -18,6 +19,7 @@ internal sealed class SuiteTravelBridge
         this.log = log;
         travelRoute = pi.GetIpcSubscriber<string, string>("AutoDuty.TravelVieriRoute");
         stopRoute = pi.GetIpcSubscriber<bool>("AutoDuty.StopVieriRouteTravel");
+        isVisualizationActive = pi.GetIpcSubscriber<bool>("AutoDuty.IsNavPlotterVisualizationActive");
     }
 
     internal RouteDispatchResult Dispatch(uint territoryId, IReadOnlyList<RoutePoint> points, bool useFlight,
@@ -60,5 +62,11 @@ internal sealed class SuiteTravelBridge
             log.Debug(ex, "VieriAutoDuty route stop IPC is unavailable.");
             return false;
         }
+    }
+
+    internal bool IsVisualizationAuthorized()
+    {
+        try { return isVisualizationActive.InvokeFunc(); }
+        catch { return false; }
     }
 }

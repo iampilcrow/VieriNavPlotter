@@ -13,6 +13,7 @@ internal sealed class NavmeshBridge
     private readonly ICallGateSubscriber<float, object> setTolerance;
     private readonly ICallGateSubscriber<object> stop;
     private readonly IPluginLog log;
+    private Vector3? ownedVisualizationDestination;
 
     internal NavmeshBridge(IDalamudPluginInterface pi, IPluginLog log)
     {
@@ -25,16 +26,42 @@ internal sealed class NavmeshBridge
         stop = pi.GetIpcSubscriber<object>("vnavmesh.Path.Stop");
     }
 
-    internal IReadOnlyList<Vector3> GetActiveWaypoints()
+    internal bool OwnsNavigationVisualization => ownedVisualizationDestination is not null;
+
+    internal IReadOnlyList<Vector3> GetActiveWaypoints(bool suiteAuthorizesNavigation)
     {
         try
         {
             if (!isRunning.InvokeFunc())
+            {
+                ownedVisualizationDestination = null;
                 return [];
+            }
 
-            return listWaypoints.InvokeFunc()
+            Vector3[] waypoints = listWaypoints.InvokeFunc()
                 .Where(point => float.IsFinite(point.X) && float.IsFinite(point.Y) && float.IsFinite(point.Z))
                 .ToArray();
+
+            if (suiteAuthorizesNavigation)
+            {
+                // AutoDuty explicitly owns this NavPlotter route or gear-shopping path.
+                // It supersedes any earlier local playback marker.
+                ownedVisualizationDestination = null;
+                return waypoints;
+            }
+
+            if (ownedVisualizationDestination is not { } expectedDestination || waypoints.Length == 0)
+                return [];
+
+            // If another plugin replaces the active path before we observe an idle frame,
+            // stop drawing immediately rather than leaking our overlay into its navigation.
+            if (Vector3.Distance(waypoints[^1], expectedDestination) > 1.5f)
+            {
+                ownedVisualizationDestination = null;
+                return [];
+            }
+
+            return waypoints;
         }
         catch
         {
@@ -57,6 +84,7 @@ internal sealed class NavmeshBridge
             if (!isReady.InvokeFunc()) { message = "vnavmesh is not ready."; return false; }
             setTolerance.InvokeAction(route.Tolerance);
             moveTo.InvokeAction(route.Points.Select(point => point.Position).ToList(), route.UseFlight);
+            ownedVisualizationDestination = route.Points[^1].Position;
             message = $"Testing {route.Name}.";
             return true;
         }
@@ -81,6 +109,7 @@ internal sealed class NavmeshBridge
             if (!isReady.InvokeFunc()) { message = "vnavmesh is not ready."; return false; }
             setTolerance.InvokeAction(Math.Clamp(tolerance, 0.1f, 20f));
             moveTo.InvokeAction(points.Select(point => point.Position).ToList(), useFlight);
+            ownedVisualizationDestination = points[^1].Position;
             message = $"Local route playback started ({points.Count} point{(points.Count == 1 ? string.Empty : "s")}).";
             return true;
         }
@@ -94,6 +123,7 @@ internal sealed class NavmeshBridge
 
     internal void Stop()
     {
+        ownedVisualizationDestination = null;
         try { stop.InvokeAction(); }
         catch (Exception ex) { log.Debug(ex, "vnavmesh stop was unavailable."); }
     }

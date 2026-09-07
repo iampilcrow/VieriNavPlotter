@@ -8,5 +8,6 @@
   <ItemGroup>
     <Compile Include="..\..\RouteModels.cs" Link="RouteModels.cs" />
     <Compile Include="..\..\BuiltInRouteCatalog.cs" Link="BuiltInRouteCatalog.cs" />
+    <Compile Include="..\..\NavigationVisualizationPolicy.cs" Link="NavigationVisualizationPolicy.cs" />
   </ItemGroup>
 </Project>
