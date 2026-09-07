@@ -11,7 +11,9 @@ internal sealed record BuiltInRouteTemplate(
     IReadOnlyList<RoutePoint> Points,
     bool UseMesh = true,
     bool UseFlight = true,
-    string Notes = "")
+    string Notes = "",
+    float Tolerance = 0.75f,
+    float LastPointTolerance = 3f)
 {
     internal bool IsCompletePath => Points.Count >= 2;
 
@@ -26,6 +28,8 @@ internal sealed record BuiltInRouteTemplate(
         Tags = $"built-in vendor gear {Category.ToLowerInvariant()} level {LevelBand}",
         UseMesh = UseMesh,
         UseFlight = UseFlight,
+        Tolerance = Tolerance,
+        LastPointTolerance = LastPointTolerance,
         BindingKind = RouteBindingKind.GearVendor,
         TargetDataId = TargetDataId,
         TargetLabel = TargetLabel,
@@ -44,7 +48,7 @@ internal static class BuiltInRouteCatalog
         [
             Point(160.35f, 15.5f, -62f),
             Point(157.5930f, 15.7000f, -69.3316f),
-        ], true, false, "The generated navmesh approach enters the hall at its clear center aisle, then stops in front of Domitien. The NPC's wall-side object coordinate is intentionally not a movement point."),
+        ], true, false, "The generated navmesh approach enters the hall at its clear center aisle, then stops precisely in front of Domitien. The NPC's wall-side object coordinate is intentionally not a movement point.", LastPointTolerance: 0.35f),
         Destination("arr-geraint", "Geraint — weapons", "ARR cities", 133, 1000217, "Geraint", "1–49", 167.8366f, 15.5f, -76.9244f),
 
         Destination("hw-seghuie", "Seghuie — accessories", "Heavensward", 419, 1011200, "Seghuie", "50–60", -188.3116f, -12.5349f, -42.71f),

@@ -429,11 +429,11 @@ internal sealed class PlotterWindow : Window
         ImGui.SameLine();
         if (ImGui.Button(template.IsCompletePath ? "Travel to Start" : "Travel to Destination"))
             DispatchRoute(template.Name, template.TerritoryId, template.Points, template.UseFlight,
-                template.UseMesh, 0.75f, 3f, travelOnly: true);
+                template.UseMesh, template.Tolerance, template.LastPointTolerance, travelOnly: true);
         ImGui.SameLine();
         if (ImGui.Button("Play Route"))
             DispatchRoute(template.Name, template.TerritoryId, template.Points, template.UseFlight,
-                template.UseMesh, 0.75f, 3f, travelOnly: false);
+                template.UseMesh, template.Tolerance, template.LastPointTolerance, travelOnly: false);
         ImGui.SameLine();
         if (ImGui.Button("Stop Playback")) StopPlayback();
         ImGui.TextDisabled(template.IsCompletePath

@@ -57,5 +57,9 @@ Check(domitien.Points[^1].Position == new Vector3(157.5930f, 15.7000f, -69.3316f
     "Domitien's final movement point must retain the measured in-game standing coordinate.");
 Check(Vector3.Distance(domitien.Points[^1].Position, new Vector3(152.8512f, 15.5f, -71.9293f)) is > 5f and < 6f,
     "Domitien's final movement point must stand in front of the NPC instead of using his wall-side object coordinate.");
+Check(domitien.LastPointTolerance is >= 0.1f and <= 0.5f,
+    "Domitien playback must reach the measured standing point instead of completing several yalms early.");
+Check(domitien.CreateEditableCopy().LastPointTolerance == domitien.LastPointTolerance,
+    "Copying Domitien to My Routes must preserve its precise final-point tolerance.");
 
 Console.WriteLine($"VieriNavPlotter RoutePolicy: {checks} checks passed.");
