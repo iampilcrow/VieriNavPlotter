@@ -142,6 +142,8 @@ Check(level64Accessories.ResolvedVendorPosition == new Vector3(-284.406f, 17.319
     "The level-64 accessories vendor must retain the real NPC coordinate separately.");
 Check(level64Accessories.LastPointTolerance == 0.75f,
     "Level-64 accessories playback must settle precisely at the authored standing point.");
+Check(level64Accessories.UseFlight,
+    "Level-64 accessories playback must permit flight for its long post-teleport approach.");
 BuiltInRouteTemplate level66Accessories = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1019269);
 Check(level66Accessories.Points.Count == 1 && level66Accessories.Points[0].Position == new Vector3(171.1704f, 5.1697f, -421.6375f),
     "The level-66 accessories vendor must use the measured walkable standing point.");
@@ -149,6 +151,8 @@ Check(level66Accessories.ResolvedVendorPosition == new Vector3(169.5713f, 5.1697
     "The level-66 accessories vendor must retain the real NPC coordinate separately.");
 Check(level66Accessories.LastPointTolerance == 0.75f,
     "Level-66 accessories playback must settle precisely at the authored standing point.");
+Check(level66Accessories.UseFlight,
+    "Level-66 accessories playback must preserve flight permission for long approaches.");
 BuiltInRouteTemplate level68Accessories = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1020866);
 Check(level68Accessories.Points.Count == 1 && level68Accessories.Points[0].Position == new Vector3(-249.5169f, 257.5265f, 750.1727f),
     "The level-68 accessories vendor must use the measured walkable standing point.");
@@ -156,6 +160,8 @@ Check(level68Accessories.ResolvedVendorPosition == new Vector3(-247.1199f, 257.5
     "The level-68 accessories vendor must retain the real NPC coordinate separately.");
 Check(level68Accessories.LastPointTolerance == 0.75f,
     "Level-68 accessories playback must settle precisely at the authored standing point.");
+Check(level68Accessories.UseFlight,
+    "Level-68 accessories playback must preserve flight permission for long approaches.");
 Check(BuiltInRouteCatalog.FindVendorPosition(faezghim.TerritoryId, faezghim.TargetDataId) == faezghim.ResolvedVendorPosition,
     "Copied vendor routes must recover their trusted catalog coordinate from the binding.");
 using (JsonDocument vendorPlayback = JsonDocument.Parse(SuiteTravelRequestContract.Create(
