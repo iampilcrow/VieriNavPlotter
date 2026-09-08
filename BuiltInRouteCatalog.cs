@@ -73,9 +73,21 @@ internal static class BuiltInRouteCatalog
         ], true, false, "Uses the measured walkable standing point directly in front of Geraint's counter. The NPC's behind-counter object coordinate is retained for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
             VendorPosition: Point(167.8366f, 15.5f, -76.9244f)),
 
-        Destination("hw-seghuie", "Seghuie — accessories", "Heavensward", 419, 1011200, "Seghuie", "50–60", -188.3116f, -12.5349f, -42.71f),
-        Destination("hw-elbert", "Elbert — weapons", "Heavensward", 419, 1011203, "Elbert", "50–60", -214.3844f, -16.0349f, -62.4175f),
-        Destination("hw-norlaise", "Norlaise — armor", "Heavensward", 419, 1011204, "Norlaise", "50–60", -203.5784f, -16.0349f, -53.2282f),
+        new("hw-seghuie", "Seghuie — accessories", "Heavensward", 419, 1011200, "Seghuie", "50–60",
+        [
+            Point(-189.1842f, -12.6349f, -40.0551f),
+        ], true, false, "Uses the measured walkable standing point directly in front of Seghuie. Her NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-188.3116f, -12.5349f, -42.71f)),
+        new("hw-elbert", "Elbert — weapons", "Heavensward", 419, 1011203, "Elbert", "50–60",
+        [
+            Point(-216.0509f, -16.1262f, -60.4229f),
+        ], true, false, "Uses the measured walkable standing point directly in front of Elbert. His NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-214.3844f, -16.0349f, -62.4175f)),
+        new("hw-norlaise", "Norlaise — armor", "Heavensward", 419, 1011204, "Norlaise", "50–60",
+        [
+            Point(-205.2957f, -16.1349f, -51.2569f),
+        ], true, false, "Uses the measured walkable standing point directly in front of Norlaise. Her NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-203.5784f, -16.0349f, -53.2282f)),
 
         Destination("sb-1018988", "Kugane accessories vendor", "Stormblood", 628, 1018988, "Gear vendor 1018988", "62–70", 29.8923f, 4.776f, 49.2442f),
         Destination("sb-1018989", "Kugane weapons vendor", "Stormblood", 628, 1018989, "Gear vendor 1018989", "62–70", 35.1788f, 4.776f, 49.2578f),

@@ -93,6 +93,27 @@ Check(faezghim.ResolvedVendorPosition == new Vector3(-236.1034f, 16f, 36.92f),
     "Faezghim must retain his real NPC coordinate separately for native interaction checks.");
 Check(faezghim.LastPointTolerance == 0.75f,
     "Faezghim playback must settle at the authored standing point without a wide early stop.");
+BuiltInRouteTemplate seghuie = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1011200);
+Check(seghuie.Points.Count == 1 && seghuie.Points[0].Position == new Vector3(-189.1842f, -12.6349f, -40.0551f),
+    "Seghuie must use the measured walkable standing point in front of her counter.");
+Check(seghuie.ResolvedVendorPosition == new Vector3(-188.3116f, -12.5349f, -42.71f),
+    "Seghuie must retain her real NPC coordinate separately for native interaction checks.");
+Check(seghuie.LastPointTolerance == 0.75f,
+    "Seghuie playback must settle at the authored standing point without a wide early stop.");
+BuiltInRouteTemplate elbert = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1011203);
+Check(elbert.Points.Count == 1 && elbert.Points[0].Position == new Vector3(-216.0509f, -16.1262f, -60.4229f),
+    "Elbert must use the measured walkable standing point in front of his counter.");
+Check(elbert.ResolvedVendorPosition == new Vector3(-214.3844f, -16.0349f, -62.4175f),
+    "Elbert must retain his real NPC coordinate separately for native interaction checks.");
+Check(elbert.LastPointTolerance == 0.75f,
+    "Elbert playback must settle at the authored standing point without a wide early stop.");
+BuiltInRouteTemplate norlaise = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1011204);
+Check(norlaise.Points.Count == 1 && norlaise.Points[0].Position == new Vector3(-205.2957f, -16.1349f, -51.2569f),
+    "Norlaise must use the measured walkable standing point in front of her counter.");
+Check(norlaise.ResolvedVendorPosition == new Vector3(-203.5784f, -16.0349f, -53.2282f),
+    "Norlaise must retain her real NPC coordinate separately for native interaction checks.");
+Check(norlaise.LastPointTolerance == 0.75f,
+    "Norlaise playback must settle at the authored standing point without a wide early stop.");
 Check(BuiltInRouteCatalog.FindVendorPosition(faezghim.TerritoryId, faezghim.TargetDataId) == faezghim.ResolvedVendorPosition,
     "Copied vendor routes must recover their trusted catalog coordinate from the binding.");
 using (JsonDocument vendorPlayback = JsonDocument.Parse(SuiteTravelRequestContract.Create(
