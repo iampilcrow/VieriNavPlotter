@@ -104,7 +104,11 @@ internal static class BuiltInRouteCatalog
             Point(40.1606f, 4.0000f, 52.5056f),
         ], true, false, "Uses the measured walkable standing point directly in front of the Kugane armor vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
             VendorPosition: Point(40.0461f, 4.8365f, 49.0844f)),
-        Destination("sb-1019296", "Level 64 accessories vendor", "Stormblood", 614, 1019296, "Gear vendor 1019296", "64", -284.406f, 17.31996f, 490.3871f),
+        new("sb-1019296", "Level 64 accessories vendor", "Stormblood", 614, 1019296, "Gear vendor 1019296", "64",
+        [
+            Point(-283.8307f, 17.3200f, 492.3687f),
+        ], true, false, "Uses the measured walkable standing point directly in front of the level-64 accessories vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-284.406f, 17.31996f, 490.3871f)),
         new("sb-1019269", "Level 66 accessories vendor", "Stormblood", 614, 1019269, "Gear vendor 1019269", "66",
         [
             Point(171.1704f, 5.1697f, -421.6375f),

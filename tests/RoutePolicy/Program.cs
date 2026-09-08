@@ -135,6 +135,13 @@ Check(kuganeArmor.ResolvedVendorPosition == new Vector3(40.0461f, 4.8365f, 49.08
     "The Kugane armor vendor must retain the real NPC coordinate separately.");
 Check(kuganeArmor.LastPointTolerance == 0.75f,
     "Kugane armor playback must settle precisely at the authored standing point.");
+BuiltInRouteTemplate level64Accessories = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1019296);
+Check(level64Accessories.Points.Count == 1 && level64Accessories.Points[0].Position == new Vector3(-283.8307f, 17.3200f, 492.3687f),
+    "The level-64 accessories vendor must use the measured walkable standing point.");
+Check(level64Accessories.ResolvedVendorPosition == new Vector3(-284.406f, 17.31996f, 490.3871f),
+    "The level-64 accessories vendor must retain the real NPC coordinate separately.");
+Check(level64Accessories.LastPointTolerance == 0.75f,
+    "Level-64 accessories playback must settle precisely at the authored standing point.");
 BuiltInRouteTemplate level66Accessories = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1019269);
 Check(level66Accessories.Points.Count == 1 && level66Accessories.Points[0].Position == new Vector3(171.1704f, 5.1697f, -421.6375f),
     "The level-66 accessories vendor must use the measured walkable standing point.");
