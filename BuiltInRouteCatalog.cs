@@ -89,9 +89,21 @@ internal static class BuiltInRouteCatalog
         ], true, false, "Uses the measured walkable standing point directly in front of Norlaise. Her NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
             VendorPosition: Point(-203.5784f, -16.0349f, -53.2282f)),
 
-        Destination("sb-1018988", "Kugane accessories vendor", "Stormblood", 628, 1018988, "Gear vendor 1018988", "62–70", 29.8923f, 4.776f, 49.2442f),
-        Destination("sb-1018989", "Kugane weapons vendor", "Stormblood", 628, 1018989, "Gear vendor 1018989", "62–70", 35.1788f, 4.776f, 49.2578f),
-        Destination("sb-1018990", "Kugane armor vendor", "Stormblood", 628, 1018990, "Gear vendor 1018990", "62–70", 40.0461f, 4.8365f, 49.0844f),
+        new("sb-1018988", "Kugane accessories vendor", "Stormblood", 628, 1018988, "Gear vendor 1018988", "62–70",
+        [
+            Point(29.9279f, 4.0000f, 52.4925f),
+        ], true, false, "Uses the measured walkable standing point directly in front of the Kugane accessories vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(29.8923f, 4.776f, 49.2442f)),
+        new("sb-1018989", "Kugane weapons vendor", "Stormblood", 628, 1018989, "Gear vendor 1018989", "62–70",
+        [
+            Point(35.2371f, 4.0000f, 52.5185f),
+        ], true, false, "Uses the measured walkable standing point directly in front of the Kugane weapons vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(35.1788f, 4.776f, 49.2578f)),
+        new("sb-1018990", "Kugane armor vendor", "Stormblood", 628, 1018990, "Gear vendor 1018990", "62–70",
+        [
+            Point(40.1606f, 4.0000f, 52.5056f),
+        ], true, false, "Uses the measured walkable standing point directly in front of the Kugane armor vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(40.0461f, 4.8365f, 49.0844f)),
         Destination("sb-1019296", "Level 64 accessories vendor", "Stormblood", 614, 1019296, "Gear vendor 1019296", "64", -284.406f, 17.31996f, 490.3871f),
         Destination("sb-1019269", "Level 66 accessories vendor", "Stormblood", 614, 1019269, "Gear vendor 1019269", "66", 169.5713f, 5.16971f, -421.7089f),
         Destination("sb-1020866", "Level 68 accessories vendor", "Stormblood", 620, 1020866, "Gear vendor 1020866", "68", -247.1199f, 257.5265f, 751.4304f),

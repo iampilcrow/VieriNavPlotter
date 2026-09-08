@@ -114,6 +114,27 @@ Check(norlaise.ResolvedVendorPosition == new Vector3(-203.5784f, -16.0349f, -53.
     "Norlaise must retain her real NPC coordinate separately for native interaction checks.");
 Check(norlaise.LastPointTolerance == 0.75f,
     "Norlaise playback must settle at the authored standing point without a wide early stop.");
+BuiltInRouteTemplate kuganeAccessories = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1018988);
+Check(kuganeAccessories.Points.Count == 1 && kuganeAccessories.Points[0].Position == new Vector3(29.9279f, 4.0000f, 52.4925f),
+    "The Kugane accessories vendor must use the measured walkable standing point.");
+Check(kuganeAccessories.ResolvedVendorPosition == new Vector3(29.8923f, 4.776f, 49.2442f),
+    "The Kugane accessories vendor must retain the real NPC coordinate separately.");
+Check(kuganeAccessories.LastPointTolerance == 0.75f,
+    "Kugane accessories playback must settle precisely at the authored standing point.");
+BuiltInRouteTemplate kuganeWeapons = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1018989);
+Check(kuganeWeapons.Points.Count == 1 && kuganeWeapons.Points[0].Position == new Vector3(35.2371f, 4.0000f, 52.5185f),
+    "The Kugane weapons vendor must use the measured walkable standing point.");
+Check(kuganeWeapons.ResolvedVendorPosition == new Vector3(35.1788f, 4.776f, 49.2578f),
+    "The Kugane weapons vendor must retain the real NPC coordinate separately.");
+Check(kuganeWeapons.LastPointTolerance == 0.75f,
+    "Kugane weapons playback must settle precisely at the authored standing point.");
+BuiltInRouteTemplate kuganeArmor = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1018990);
+Check(kuganeArmor.Points.Count == 1 && kuganeArmor.Points[0].Position == new Vector3(40.1606f, 4.0000f, 52.5056f),
+    "The Kugane armor vendor must use the measured walkable standing point.");
+Check(kuganeArmor.ResolvedVendorPosition == new Vector3(40.0461f, 4.8365f, 49.0844f),
+    "The Kugane armor vendor must retain the real NPC coordinate separately.");
+Check(kuganeArmor.LastPointTolerance == 0.75f,
+    "Kugane armor playback must settle precisely at the authored standing point.");
 Check(BuiltInRouteCatalog.FindVendorPosition(faezghim.TerritoryId, faezghim.TargetDataId) == faezghim.ResolvedVendorPosition,
     "Copied vendor routes must recover their trusted catalog coordinate from the binding.");
 using (JsonDocument vendorPlayback = JsonDocument.Parse(SuiteTravelRequestContract.Create(
