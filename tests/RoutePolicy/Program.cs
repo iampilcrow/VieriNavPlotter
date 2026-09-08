@@ -207,6 +207,24 @@ foreach (var expected in measuredEndwalker)
     Check(route.LastPointTolerance == 0.75f && route.UseFlight,
         $"Endwalker vendor {expected.DataId} must settle precisely while retaining flight for long approaches.");
 }
+var measuredDawntrail = new[]
+{
+    (DataId: 1048377u, Point: new Vector3(-30.9625f, -10.0000f, 82.3698f), Npc: new Vector3(-33.0111f, -10f, 79.7725f)),
+    (DataId: 1048851u, Point: new Vector3(-450.8014f, 121.6334f, 276.1090f), Npc: new Vector3(-449.6504f, 122.1928f, 274.0082f)),
+    (DataId: 1048971u, Point: new Vector3(627.0523f, -137.1266f, 514.2490f), Npc: new Vector3(626.9987f, -137.1328f, 517.8016f)),
+    (DataId: 1049371u, Point: new Vector3(-285.4235f, 18.9721f, -96.3331f), Npc: new Vector3(-282.598f, 18.9704f, -96.587f)),
+    (DataId: 1049486u, Point: new Vector3(-210.7973f, 31.0000f, 129.5844f), Npc: new Vector3(-209.3354f, 31f, 129.8653f)),
+};
+foreach (var expected in measuredDawntrail)
+{
+    BuiltInRouteTemplate route = BuiltInRouteCatalog.All.Single(candidate => candidate.TargetDataId == expected.DataId);
+    Check(route.Points.Count == 1 && route.Points[0].Position == expected.Point,
+        $"Dawntrail vendor {expected.DataId} must use its measured walkable standing point.");
+    Check(route.ResolvedVendorPosition == expected.Npc,
+        $"Dawntrail vendor {expected.DataId} must retain its NPC coordinate separately.");
+    Check(route.LastPointTolerance == 0.75f && route.UseFlight,
+        $"Dawntrail vendor {expected.DataId} must settle precisely while retaining flight for long approaches.");
+}
 Check(BuiltInRouteCatalog.FindVendorPosition(faezghim.TerritoryId, faezghim.TargetDataId) == faezghim.ResolvedVendorPosition,
     "Copied vendor routes must recover their trusted catalog coordinate from the binding.");
 using (JsonDocument vendorPlayback = JsonDocument.Parse(SuiteTravelRequestContract.Create(

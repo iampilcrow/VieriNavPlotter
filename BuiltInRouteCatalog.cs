@@ -162,11 +162,31 @@ internal static class BuiltInRouteCatalog
         ], true, true, "Uses the measured walkable standing point for the level-88 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
             VendorPosition: Point(467.0165f, 437.0017f, 327.212f)),
 
-        Destination("dt-1048377", "Level 90 gear vendor", "Dawntrail", 1185, 1048377, "Gear vendor 1048377", "90", -33.0111f, -10f, 79.7725f),
-        Destination("dt-1048851", "Level 92 gear vendor", "Dawntrail", 1188, 1048851, "Gear vendor 1048851", "92", -449.6504f, 122.1928f, 274.0082f),
-        Destination("dt-1048971", "Level 94 gear vendor", "Dawntrail", 1189, 1048971, "Gear vendor 1048971", "94", 626.9987f, -137.1328f, 517.8016f),
-        Destination("dt-1049371", "Level 96 gear vendor", "Dawntrail", 1190, 1049371, "Gear vendor 1049371", "96", -282.598f, 18.9704f, -96.587f),
-        Destination("dt-1049486", "Level 98 gear vendor", "Dawntrail", 1191, 1049486, "Gear vendor 1049486", "98", -209.3354f, 31f, 129.8653f),
+        new("dt-1048377", "Level 90 gear vendor", "Dawntrail", 1185, 1048377, "Gear vendor 1048377", "90",
+        [
+            Point(-30.9625f, -10.0000f, 82.3698f),
+        ], true, true, "Uses the measured walkable standing point for the level-90 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-33.0111f, -10f, 79.7725f)),
+        new("dt-1048851", "Level 92 gear vendor", "Dawntrail", 1188, 1048851, "Gear vendor 1048851", "92",
+        [
+            Point(-450.8014f, 121.6334f, 276.1090f),
+        ], true, true, "Uses the measured walkable standing point for the level-92 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-449.6504f, 122.1928f, 274.0082f)),
+        new("dt-1048971", "Level 94 gear vendor", "Dawntrail", 1189, 1048971, "Gear vendor 1048971", "94",
+        [
+            Point(627.0523f, -137.1266f, 514.2490f),
+        ], true, true, "Uses the measured walkable standing point for the level-94 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(626.9987f, -137.1328f, 517.8016f)),
+        new("dt-1049371", "Level 96 gear vendor", "Dawntrail", 1190, 1049371, "Gear vendor 1049371", "96",
+        [
+            Point(-285.4235f, 18.9721f, -96.3331f),
+        ], true, true, "Uses the measured walkable standing point for the level-96 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-282.598f, 18.9704f, -96.587f)),
+        new("dt-1049486", "Level 98 gear vendor", "Dawntrail", 1191, 1049486, "Gear vendor 1049486", "98",
+        [
+            Point(-210.7973f, 31.0000f, 129.5844f),
+        ], true, true, "Uses the measured walkable standing point for the level-98 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-209.3354f, 31f, 129.8653f)),
     ];
 
     private static BuiltInRouteTemplate Destination(string id, string name, string category, uint territoryId,
