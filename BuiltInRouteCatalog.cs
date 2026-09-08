@@ -136,20 +136,31 @@ internal static class BuiltInRouteCatalog
         ], true, false, "Uses the measured walkable standing point directly in front of the second Crystarium gear vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
             VendorPosition: Point(-126.2379f, -1.0834f, 96.3301f)),
 
-        new("ew-1037049", "Old Sharlayan gear vendor — staged stairs", "Endwalker", 962, 1037049, "Gear vendor 1037049", "80",
+        new("ew-1037049", "Old Sharlayan gear vendor", "Endwalker", 962, 1037049, "Gear vendor 1037049", "80",
         [
-            Point(81f, 4.75f, -82f),
-            Point(80f, 4.75f, -80.5f),
-            Point(78.5f, 4.9f, -77.5f),
-            Point(77.75f, 5.25f, -74f),
-            Point(56.78f, 5.15f, -73.87f),
-            Point(42.9011f, 5.15f, -77.0043f),
-        ], false, false, "Reference copy of AutoDuty's staged lower-plaza, wall-corner, stair, upper-plaza, and vendor coordinates.",
+            Point(43.2774f, 5.1500f, -74.5438f),
+        ], true, false, "Uses the measured direct standing point reached from the Old Sharlayan aetheryte side. The retired staged stair route is no longer used.", LastPointTolerance: 0.75f,
             VendorPosition: Point(42.9011f, 5.15f, -77.0043f)),
-        Destination("ew-1037720", "Level 82 gear vendor", "Endwalker", 958, 1037720, "Gear vendor 1037720", "82", -429.1346f, 22.4812f, 450.393f),
-        Destination("ew-1037791", "Level 84 gear vendor", "Endwalker", 959, 1037791, "Gear vendor 1037791", "84", -19.8631f, -132.9519f, -461.3871f),
-        Destination("ew-1037907", "Level 86 gear vendor", "Endwalker", 961, 1037907, "Gear vendor 1037907", "86", 140.5236f, 10.3859f, 164.8957f),
-        Destination("ew-1038003", "Level 88 gear vendor", "Endwalker", 960, 1038003, "Gear vendor 1038003", "88", 467.0165f, 437.0017f, 327.212f),
+        new("ew-1037720", "Level 82 gear vendor", "Endwalker", 958, 1037720, "Gear vendor 1037720", "82",
+        [
+            Point(-425.7329f, 22.4297f, 450.5089f),
+        ], true, true, "Uses the measured walkable standing point for the level-82 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-429.1346f, 22.4812f, 450.393f)),
+        new("ew-1037791", "Level 84 gear vendor", "Endwalker", 959, 1037791, "Gear vendor 1037791", "84",
+        [
+            Point(-21.4712f, -132.9464f, -462.4854f),
+        ], true, true, "Uses the measured walkable standing point for the level-84 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-19.8631f, -132.9519f, -461.3871f)),
+        new("ew-1037907", "Level 86 gear vendor", "Endwalker", 961, 1037907, "Gear vendor 1037907", "86",
+        [
+            Point(140.9911f, 10.4610f, 163.3107f),
+        ], true, true, "Uses the measured walkable standing point for the level-86 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(140.5236f, 10.3859f, 164.8957f)),
+        new("ew-1038003", "Level 88 gear vendor", "Endwalker", 960, 1038003, "Gear vendor 1038003", "88",
+        [
+            Point(468.3042f, 437.0017f, 327.8175f),
+        ], true, true, "Uses the measured walkable standing point for the level-88 gear vendor while preserving the NPC coordinate separately.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(467.0165f, 437.0017f, 327.212f)),
 
         Destination("dt-1048377", "Level 90 gear vendor", "Dawntrail", 1185, 1048377, "Gear vendor 1048377", "90", -33.0111f, -10f, 79.7725f),
         Destination("dt-1048851", "Level 92 gear vendor", "Dawntrail", 1188, 1048851, "Gear vendor 1048851", "92", -449.6504f, 122.1928f, 274.0082f),

@@ -45,8 +45,8 @@ Check(!RoutePolicy.IsValid(valid), "Non-finite coordinates must be rejected.");
 Check(BuiltInRouteCatalog.All.Count == 27, "All 27 distinct AutoDuty gear vendors must be represented.");
 Check(BuiltInRouteCatalog.All.Select(route => (route.TerritoryId, route.TargetDataId)).Distinct().Count() == 27,
     "Built-in vendor bindings must be unique.");
-Check(BuiltInRouteCatalog.All.Count(route => route.IsCompletePath) == 2,
-    "Only the two existing authored multi-point vendor approaches may be presented as complete paths.");
+Check(BuiltInRouteCatalog.All.Count(route => route.IsCompletePath) == 1,
+    "Only Domitien's authored multi-point vendor approach may be presented as a complete path.");
 Check(BuiltInRouteCatalog.All.Where(route => route.IsCompletePath).All(route => RoutePolicy.IsValid(route.CreateEditableCopy())),
     "Every complete built-in template must produce a valid editable route.");
 Check(BuiltInRouteCatalog.All.Where(route => !route.IsCompletePath).All(route => !RoutePolicy.IsValid(route.CreateEditableCopy())),
@@ -183,6 +183,30 @@ Check(crystariumGear2.ResolvedVendorPosition == new Vector3(-126.2379f, -1.0834f
     "The second Crystarium gear vendor must retain the real NPC coordinate separately.");
 Check(crystariumGear2.LastPointTolerance == 0.75f && !crystariumGear2.UseFlight,
     "Second Crystarium gear-vendor playback must settle precisely and never request city flight.");
+BuiltInRouteTemplate oldSharlayan = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1037049);
+Check(oldSharlayan.Points.Count == 1 && oldSharlayan.Points[0].Position == new Vector3(43.2774f, 5.1500f, -74.5438f),
+    "Old Sharlayan must use the measured direct standing point without the retired staged stairs.");
+Check(oldSharlayan.ResolvedVendorPosition == new Vector3(42.9011f, 5.15f, -77.0043f),
+    "Old Sharlayan must retain the NPC coordinate separately from its standing point.");
+Check(oldSharlayan.LastPointTolerance == 0.75f && !oldSharlayan.UseFlight,
+    "Old Sharlayan playback must settle precisely and never request city flight.");
+var measuredEndwalker = new[]
+{
+    (DataId: 1037720u, Point: new Vector3(-425.7329f, 22.4297f, 450.5089f), Npc: new Vector3(-429.1346f, 22.4812f, 450.393f)),
+    (DataId: 1037791u, Point: new Vector3(-21.4712f, -132.9464f, -462.4854f), Npc: new Vector3(-19.8631f, -132.9519f, -461.3871f)),
+    (DataId: 1037907u, Point: new Vector3(140.9911f, 10.4610f, 163.3107f), Npc: new Vector3(140.5236f, 10.3859f, 164.8957f)),
+    (DataId: 1038003u, Point: new Vector3(468.3042f, 437.0017f, 327.8175f), Npc: new Vector3(467.0165f, 437.0017f, 327.212f)),
+};
+foreach (var expected in measuredEndwalker)
+{
+    BuiltInRouteTemplate route = BuiltInRouteCatalog.All.Single(candidate => candidate.TargetDataId == expected.DataId);
+    Check(route.Points.Count == 1 && route.Points[0].Position == expected.Point,
+        $"Endwalker vendor {expected.DataId} must use its measured walkable standing point.");
+    Check(route.ResolvedVendorPosition == expected.Npc,
+        $"Endwalker vendor {expected.DataId} must retain its NPC coordinate separately.");
+    Check(route.LastPointTolerance == 0.75f && route.UseFlight,
+        $"Endwalker vendor {expected.DataId} must settle precisely while retaining flight for long approaches.");
+}
 Check(BuiltInRouteCatalog.FindVendorPosition(faezghim.TerritoryId, faezghim.TargetDataId) == faezghim.ResolvedVendorPosition,
     "Copied vendor routes must recover their trusted catalog coordinate from the binding.");
 using (JsonDocument vendorPlayback = JsonDocument.Parse(SuiteTravelRequestContract.Create(
