@@ -105,8 +105,16 @@ internal static class BuiltInRouteCatalog
         ], true, false, "Uses the measured walkable standing point directly in front of the Kugane armor vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
             VendorPosition: Point(40.0461f, 4.8365f, 49.0844f)),
         Destination("sb-1019296", "Level 64 accessories vendor", "Stormblood", 614, 1019296, "Gear vendor 1019296", "64", -284.406f, 17.31996f, 490.3871f),
-        Destination("sb-1019269", "Level 66 accessories vendor", "Stormblood", 614, 1019269, "Gear vendor 1019269", "66", 169.5713f, 5.16971f, -421.7089f),
-        Destination("sb-1020866", "Level 68 accessories vendor", "Stormblood", 620, 1020866, "Gear vendor 1020866", "68", -247.1199f, 257.5265f, 751.4304f),
+        new("sb-1019269", "Level 66 accessories vendor", "Stormblood", 614, 1019269, "Gear vendor 1019269", "66",
+        [
+            Point(171.1704f, 5.1697f, -421.6375f),
+        ], true, false, "Uses the measured walkable standing point directly in front of the level-66 accessories vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(169.5713f, 5.16971f, -421.7089f)),
+        new("sb-1020866", "Level 68 accessories vendor", "Stormblood", 620, 1020866, "Gear vendor 1020866", "68",
+        [
+            Point(-249.5169f, 257.5265f, 750.1727f),
+        ], true, false, "Uses the measured walkable standing point directly in front of the level-68 accessories vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-247.1199f, 257.5265f, 751.4304f)),
 
         Destination("shb-1027242", "Crystarium accessories vendor", "Shadowbringers", 819, 1027242, "Gear vendor 1027242", "72–80", -121.5391f, -1.1096f, 129.6337f),
         Destination("shb-1027243", "Crystarium gear vendor", "Shadowbringers", 819, 1027243, "Gear vendor 1027243", "72–80", -132.8298f, -1.0798f, 112.6268f),
