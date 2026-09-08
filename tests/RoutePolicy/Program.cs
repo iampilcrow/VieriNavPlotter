@@ -162,6 +162,27 @@ Check(level68Accessories.LastPointTolerance == 0.75f,
     "Level-68 accessories playback must settle precisely at the authored standing point.");
 Check(level68Accessories.UseFlight,
     "Level-68 accessories playback must preserve flight permission for long approaches.");
+BuiltInRouteTemplate crystariumAccessories = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1027242);
+Check(crystariumAccessories.Points.Count == 1 && crystariumAccessories.Points[0].Position == new Vector3(-120.8424f, -1.0766f, 126.7847f),
+    "The Crystarium accessories vendor must use the measured walkable standing point.");
+Check(crystariumAccessories.ResolvedVendorPosition == new Vector3(-121.5391f, -1.1096f, 129.6337f),
+    "The Crystarium accessories vendor must retain the real NPC coordinate separately.");
+Check(crystariumAccessories.LastPointTolerance == 0.75f && !crystariumAccessories.UseFlight,
+    "Crystarium accessories playback must settle precisely and never request city flight.");
+BuiltInRouteTemplate crystariumGear = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1027243);
+Check(crystariumGear.Points.Count == 1 && crystariumGear.Points[0].Position == new Vector3(-129.5804f, -1.0767f, 112.0974f),
+    "The first Crystarium gear vendor must use the measured walkable standing point.");
+Check(crystariumGear.ResolvedVendorPosition == new Vector3(-132.8298f, -1.0798f, 112.6268f),
+    "The first Crystarium gear vendor must retain the real NPC coordinate separately.");
+Check(crystariumGear.LastPointTolerance == 0.75f && !crystariumGear.UseFlight,
+    "First Crystarium gear-vendor playback must settle precisely and never request city flight.");
+BuiltInRouteTemplate crystariumGear2 = BuiltInRouteCatalog.All.Single(route => route.TargetDataId == 1027991);
+Check(crystariumGear2.Points.Count == 1 && crystariumGear2.Points[0].Position == new Vector3(-122.9644f, -1.0765f, 99.1908f),
+    "The second Crystarium gear vendor must use the measured walkable standing point.");
+Check(crystariumGear2.ResolvedVendorPosition == new Vector3(-126.2379f, -1.0834f, 96.3301f),
+    "The second Crystarium gear vendor must retain the real NPC coordinate separately.");
+Check(crystariumGear2.LastPointTolerance == 0.75f && !crystariumGear2.UseFlight,
+    "Second Crystarium gear-vendor playback must settle precisely and never request city flight.");
 Check(BuiltInRouteCatalog.FindVendorPosition(faezghim.TerritoryId, faezghim.TargetDataId) == faezghim.ResolvedVendorPosition,
     "Copied vendor routes must recover their trusted catalog coordinate from the binding.");
 using (JsonDocument vendorPlayback = JsonDocument.Parse(SuiteTravelRequestContract.Create(

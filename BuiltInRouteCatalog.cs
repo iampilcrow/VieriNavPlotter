@@ -120,9 +120,21 @@ internal static class BuiltInRouteCatalog
         ], true, true, "Uses the measured walkable standing point directly in front of the level-68 accessories vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point. Flight remains available when a long approach requires it.", LastPointTolerance: 0.75f,
             VendorPosition: Point(-247.1199f, 257.5265f, 751.4304f)),
 
-        Destination("shb-1027242", "Crystarium accessories vendor", "Shadowbringers", 819, 1027242, "Gear vendor 1027242", "72–80", -121.5391f, -1.1096f, 129.6337f),
-        Destination("shb-1027243", "Crystarium gear vendor", "Shadowbringers", 819, 1027243, "Gear vendor 1027243", "72–80", -132.8298f, -1.0798f, 112.6268f),
-        Destination("shb-1027991", "Crystarium gear vendor 2", "Shadowbringers", 819, 1027991, "Gear vendor 1027991", "72–80", -126.2379f, -1.0834f, 96.3301f),
+        new("shb-1027242", "Crystarium accessories vendor", "Shadowbringers", 819, 1027242, "Gear vendor 1027242", "72–80",
+        [
+            Point(-120.8424f, -1.0766f, 126.7847f),
+        ], true, false, "Uses the measured walkable standing point directly in front of the Crystarium accessories vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-121.5391f, -1.1096f, 129.6337f)),
+        new("shb-1027243", "Crystarium gear vendor", "Shadowbringers", 819, 1027243, "Gear vendor 1027243", "72–80",
+        [
+            Point(-129.5804f, -1.0767f, 112.0974f),
+        ], true, false, "Uses the measured walkable standing point directly in front of the first Crystarium gear vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-132.8298f, -1.0798f, 112.6268f)),
+        new("shb-1027991", "Crystarium gear vendor 2", "Shadowbringers", 819, 1027991, "Gear vendor 1027991", "72–80",
+        [
+            Point(-122.9644f, -1.0765f, 99.1908f),
+        ], true, false, "Uses the measured walkable standing point directly in front of the second Crystarium gear vendor. The NPC object coordinate is retained separately for native interaction checks and is not a movement point.", LastPointTolerance: 0.75f,
+            VendorPosition: Point(-126.2379f, -1.0834f, 96.3301f)),
 
         new("ew-1037049", "Old Sharlayan gear vendor — staged stairs", "Endwalker", 962, 1037049, "Gear vendor 1037049", "80",
         [
